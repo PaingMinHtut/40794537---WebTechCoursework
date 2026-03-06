@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>d20</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    #die {
+      width: 120px;
+      height: 120px;
+      line-height: 120px;
+      margin: 20px auto;
+      font-size: 40px;
+      font-weight: bold;
+      border-radius: 50%;
+      border: 3px solid black;
+      cursor: pointer;
+      background-color: lightgray;
+      user-select: none;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    #resultText {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Click the d20 to Roll</h2>
+
+  <div id="die">?</div>
+
+  <div id="resultText"></div>
+
+</body>
+</html>
