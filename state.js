@@ -1,3 +1,6 @@
 export const gameState = {
-    screen: "menu"
+    screen: "menu",
+    chapter: null,
+    step: 0,
+    partyName: ""
 };

@@ -43,3 +43,37 @@ body {
 .menu-button:hover {
     background: #555;
 }
+
+/* Story container */
+.story-container {
+    width: 600px;
+    height: 400px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Scrollable text area */
+.story-text {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+/* Controls */
+.story-controls {
+    text-align: center;
+}
+
+.story-controls button {
+    margin: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.story-controls input {
+    padding: 8px;
+    margin-right: 5px;
+}

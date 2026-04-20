@@ -1,6 +1,9 @@
+import { gameState } from "../state.js";
+import { startChapter1 } from "../story/chapter1.js";
+
 export function showNewGame() {
-    document.getElementById("app").innerHTML = `
-        <h1>This is the New Game page</h1>
-        <button onclick="navigate('menu')">Back</button>
-    `;
+    gameState.chapter = 1;
+    gameState.step = 0;
+
+    startChapter1();
 }
