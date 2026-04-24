@@ -1,3 +1,5 @@
+import { saveGame } from "./saveSystem.js";
+
 export function startStory() {
     const app = document.getElementById("app");
 
@@ -124,11 +126,13 @@ function appendText(text) {
 /* Global controls */
 window.nextStep = function() {
     gameState.step++;
+    saveGame(gameState); // autosave
     renderStep();
 };
 
 window.chooseOption = function(stepIndex) {
     gameState.step = stepIndex;
+    saveGame(gameState);
     renderStep();
 };
 
@@ -158,5 +162,6 @@ window.submitName = function() {
     }
 
     gameState.step++;
+    saveGame(gameState); // autosave after naming
     renderStep();
 };
