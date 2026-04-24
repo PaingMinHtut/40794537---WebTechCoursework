@@ -77,3 +77,55 @@ body {
     padding: 8px;
     margin-right: 5px;
 }
+
+/* Dialogue wrapper */
+.dialogue {
+    display: flex;
+    margin: 10px 0;
+    align-items: flex-end;
+}
+
+/* Left (allies) */
+.dialogue.left {
+    justify-content: flex-start;
+}
+
+/* Right (NPC/enemy) */
+.dialogue.right {
+    justify-content: flex-end;
+}
+
+/* Portrait + name */
+.character {
+    text-align: center;
+    width: 60px;
+    font-size: 12px;
+}
+
+.portrait {
+    width: 50px;
+    height: 50px;
+    background: gray;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+/* Bubble */
+.bubble {
+    max-width: 60%;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 0 10px;
+}
+
+/* Left bubble */
+.dialogue.left .bubble {
+    background: #444;
+    border-bottom-left-radius: 0;
+}
+
+/* Right bubble */
+.dialogue.right .bubble {
+    background: #2a2a2a;
+    border-bottom-right-radius: 0;
+}
