@@ -1,7 +1,7 @@
 import { gameState } from "./state.js";
 
 import { showMenu } from "./screens/menu.js";
-import { showNewGame } from "./screens/newGame.js";
+import { showNewGame } from "./screens/newgame.js";
 import { showSaves } from "./screens/continue.js";
 import { showChoices } from "./screens/choices.js";
 
