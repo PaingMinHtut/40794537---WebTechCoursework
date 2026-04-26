@@ -1,5 +1,5 @@
 function generateId() {
-    return crypto.randomUUID();
+    return "save-" + crypto.randomUUID();
 }
 
 const STORAGE_KEY = "game_saves";
@@ -15,10 +15,13 @@ function setAllSaves(saves) {
 export function createNewSave(gameState) {
     const saves = getAllSaves();
 
-    const id = crypto.randomUUID();
+    const id = generateId();
     gameState.saveId = id;
 
-    saves[id] = structuredClone(gameState);
+    const saveData = structuredClone(gameState);
+    saveData.lastPlayed = Date.now(); // add timestamp
+
+    saves[id] = saveData;
     setAllSaves(saves);
 
     return id;
@@ -28,7 +31,11 @@ export function saveGame(gameState) {
     if (!gameState.saveId) return;
 
     const saves = getAllSaves();
-    saves[gameState.saveId] = structuredClone(gameState);
+
+    const saveData = structuredClone(gameState);
+    saveData.lastPlayed = Date.now(); // update timestamp on save
+
+    saves[gameState.saveId] = saveData;
 
     setAllSaves(saves);
 }
@@ -51,6 +58,7 @@ export function getSaveList() {
         id,
         partyName: data.partyName,
         chapter: data.chapter,
-        step: data.step
+        step: data.step,
+        lastPlayed: data.lastPlayed || 0 // fallback for old saves
     }));
 }
