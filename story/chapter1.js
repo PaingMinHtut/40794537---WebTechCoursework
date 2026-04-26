@@ -198,3 +198,5 @@ const storySteps = [
 
     // you are currently here (the rest of the story hasn't been written yet)
 ];
+
+export const chapter1 = storySteps;

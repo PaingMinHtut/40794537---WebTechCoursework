@@ -1,3 +1,4 @@
+import { gameState } from "./state.js";
 import { saveGame } from "./saveSystem.js";
 
 export function startStory() {

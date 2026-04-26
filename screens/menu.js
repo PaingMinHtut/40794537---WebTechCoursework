@@ -3,7 +3,7 @@ export function showMenu() {
 
     app.innerHTML = `
         <div class="menu-container">
-            <div class="game-title">Echoes of Aether</div>
+            <div class="game-title">Dungeons & Superstores</div>
 
             <div class="menu-box">
                 <div class="menu-button" onclick="navigate('newGame')">New Game</div>

@@ -1,9 +1,9 @@
-import { gameState } from "./state.js";
+import { gameState } from "../engine/state.js";
 
-import { showMenu } from "./screens/menu.js";
-import { showNewGame } from "./screens/newgame.js";
-import { showSaves } from "./screens/continue.js";
-import { showChoices } from "./screens/choices.js";
+import { showMenu } from "../screens/menu.js";
+import { showNewGame } from "../screens/newgame.js";
+import { showSaves } from "../screens/continue.js";
+import { showChoices } from "../screens/choices.js";
 
 // Make navigation globally accessible (for onclick)
 window.navigate = function(screen) {
