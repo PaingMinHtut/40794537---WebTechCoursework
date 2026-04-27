@@ -1,3 +1,5 @@
+import { defaultChoiceFlags } from "../choices/choiceConditions.js";
+
 export const gameState = {
     screen: "menu",
     chapter: null,
@@ -6,5 +8,9 @@ export const gameState = {
     inventory: [],
     allies: ["Grog", "Leo", "Rellynn"],
 
-    saveId: null
+    saveId: null,
+
+    flags: { ...defaultChoiceFlags },
+
+    choiceHistory: [] // NEW
 };

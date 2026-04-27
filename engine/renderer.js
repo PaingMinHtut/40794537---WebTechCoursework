@@ -1,5 +1,8 @@
 import { gameState } from "./state.js";
 import { saveGame } from "./saveSystem.js";
+import { chapter1 } from "../story/chapter1.js";
+import { chapter2 } from "../story/chapter2.js";
+import { chapter3 } from "../story/chapter3.js";
 
 export function startStory() {
     const app = document.getElementById("app");
@@ -11,6 +14,15 @@ export function startStory() {
         </div>
     `;
 
+    // 🧠 Reset rendered flags (important)
+    currentStorySteps.forEach(step => step.rendered = false);
+
+    // 🧠 Replay all previous steps
+    for (let i = 0; i < gameState.step; i++) {
+        renderPastStep(i);
+    }
+
+    // Render current step normally
     renderStep();
 }
 
@@ -65,8 +77,22 @@ function renderStep() {
         );
 
         controls.innerHTML = availableOptions.map(opt => `
-            <button onclick="chooseOption(${opt.nextStep})">${opt.label}</button>
+            <button class="choice-btn">${opt.label}</button>
         `).join("");
+
+        document.querySelectorAll(".choice-btn").forEach((btn, index) => {
+            btn.onclick = () => chooseOption(availableOptions[index]);
+        });
+    }
+
+    if (step.type === "nextChapter") {
+        appendText(resolveText(step.text || "Proceed to next chapter?"));
+
+        controls.innerHTML = `
+            <button onclick="goToNextChapter(${step.nextChapter})">
+                ${step.buttonText || "Continue"}
+            </button>
+        `;
     }
 
     if (step.rendered) return;
@@ -131,8 +157,40 @@ window.nextStep = function() {
     renderStep();
 };
 
-window.chooseOption = function(stepIndex) {
-    gameState.step = stepIndex;
+window.chooseOption = function(option) {
+
+    // ✅ Record choice (NEW SYSTEM)
+    gameState.choiceHistory.push({
+        chapter: gameState.chapter,
+        text: option.log || option.label
+    });
+
+    // ✅ Apply effect
+    if (option.effect) {
+        option.effect(gameState);
+    }
+
+    // ✅ Location change
+    if (option.setLocation) {
+        gameState.location = option.setLocation;
+    }
+
+    // ✅ Chapter change
+    if (option.nextChapter) {
+        gameState.chapter = option.nextChapter;
+        gameState.step = 0;
+
+        if (gameState.chapter === 1) loadChapter(chapter1);
+        if (gameState.chapter === 2) loadChapter(chapter2);
+        if (gameState.chapter === 3) loadChapter(chapter3);
+
+        saveGame(gameState);
+        startStory();
+        return;
+    }
+
+    // ✅ Normal progression
+    gameState.step = option.nextStep;
     saveGame(gameState);
     renderStep();
 };
@@ -165,4 +223,48 @@ window.submitName = function() {
     gameState.step++;
     saveGame(gameState); // autosave after naming
     renderStep();
+};
+
+// Used when replaying past steps (like when loading a save)
+function renderPastStep(index) {
+    const step = currentStorySteps[index];
+
+    if (!step || step.rendered) return;
+
+    if (step.type === "text") {
+        appendText(resolveText(step.text));
+    }
+
+    if (step.type === "dialogue") {
+        const lines = typeof step.lines === "function"
+            ? step.lines(gameState)
+            : step.lines;
+
+        if (lines) {
+            lines.forEach(line => {
+                appendDialogue(line.speaker, resolveText(line.text));
+            });
+        } else {
+            appendDialogue(step.speaker, resolveText(step.text));
+        }
+    }
+
+    // ❗ Skip interactive steps when replaying
+    // (input, choice, nextChapter)
+
+    step.rendered = true;
+}
+
+window.goToNextChapter = function(chapterNumber) {
+    gameState.chapter = chapterNumber;
+    gameState.step = 0;
+
+    // Load correct chapter
+    if (chapterNumber === 1) loadChapter(chapter1);
+    if (chapterNumber === 2) loadChapter(chapter2);
+    if (chapterNumber === 3) loadChapter(chapter3);
+    // expand later
+
+    saveGame(gameState);
+    startStory();
 };

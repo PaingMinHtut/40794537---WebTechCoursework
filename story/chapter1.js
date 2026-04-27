@@ -1,5 +1,3 @@
-import { gameState } from "../engine/state.js";
-
 // Story data structure:
 const storySteps = [
     {
@@ -66,7 +64,7 @@ const storySteps = [
                         text: (state) => `Fear not, humble guards, for your heroes are finally here! We are ${state.partyName}!`
                     },
                     {
-                        speaker: "Guard 2",
+                        speaker: "Rellynn",
                         text: `(whispers) This is so cringe...`
                     }
                 ];
@@ -197,6 +195,33 @@ const storySteps = [
     },
 
     // you are currently here (the rest of the story hasn't been written yet)
+
+    // choice example:
+    {
+        type: "choice",
+        text: "What do you do?",
+        options: [
+            {
+                label: "Ask for orange juice",
+                log: "The party asked for some orange juice.",
+                nextStep: 19,
+                effect: (state) => {
+                    state.flags.askedForOJ = true;
+                }
+            },
+            {
+                label: "Stay silent",
+                nextStep: 19 //placeholder
+            }
+        ]
+    },
+    // next chapter example:
+    {
+        type: "nextChapter",
+        text: "The party steps into Walmart... something feels wrong.",
+        nextChapter: 2,
+        buttonText: "Enter Walmart"
+    }
 ];
 
 export const chapter1 = storySteps;
