@@ -1,5 +1,6 @@
 import { gameState } from "./state.js";
 import { saveGame } from "./saveSystem.js";
+import { openDiceModal } from "../engine/dice.js";
 import { chapter1 } from "../story/chapter1.js";
 import { chapter2 } from "../story/chapter2.js";
 import { chapter3 } from "../story/chapter3.js";
@@ -93,6 +94,23 @@ function renderStep() {
                 ${step.buttonText || "Continue"}
             </button>
         `;
+    }
+
+    if (step.type === "dice") {
+        appendText(resolveText(step.text));
+
+        controls.innerHTML = `
+            <button id="rollDiceBtn">Roll Dice</button>
+        `;
+
+        document.getElementById("rollDiceBtn").onclick = () => {
+            openDiceModal({
+                text: step.rollText || "Rolling...",
+                onResult: (result) => {
+                    handleDiceResult(step, result);
+                }
+            });
+        };
     }
 
     if (step.rendered) return;
@@ -268,3 +286,27 @@ window.goToNextChapter = function(chapterNumber) {
     saveGame(gameState);
     startStory();
 };
+
+function handleDiceResult(step, roll) {
+    // Save last roll
+    gameState.lastRoll = roll;
+
+    // Optional: store history
+    if (!gameState.rollHistory) gameState.rollHistory = [];
+    gameState.rollHistory.push({
+        chapter: gameState.chapter,
+        roll: roll
+    });
+
+    // Determine outcome
+    if (step.success && roll.total >= step.success.threshold) {
+        gameState.step = step.success.nextStep;
+    } else if (step.fail) {
+        gameState.step = step.fail.nextStep;
+    } else {
+        gameState.step++;
+    }
+
+    saveGame(gameState);
+    renderStep();
+}

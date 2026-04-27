@@ -194,7 +194,7 @@ const storySteps = [
         text: `Despite Rellynn's protests, the two man-children drag her along and head to the nearest tavern anyway. The interiors of the taven are dimly lit, the air thick with the smell of ale and sweat. It was also quite deserted, as there was no one else but the bartender behind the counter. The bartender looks up as they enter, and greets them with an innocent look on his face.`
     },
 
-    // you are currently here (the rest of the story hasn't been written yet)
+    // you are currently here (the rest of the story hasn't been written or "fine-tuned" yet)
 
     // choice example:
     {
@@ -204,14 +204,14 @@ const storySteps = [
             {
                 label: "Ask for orange juice",
                 log: "The party asked for some orange juice.",
-                nextStep: 19,
+                nextStep: 18,
                 effect: (state) => {
                     state.flags.askedForOJ = true;
                 }
             },
             {
                 label: "Stay silent",
-                nextStep: 19 //placeholder
+                nextStep: 18 //placeholder
             }
         ]
     },

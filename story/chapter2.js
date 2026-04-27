@@ -4,6 +4,20 @@ const storySteps = [
         type: "text",
         text: "A strange presence watches you..." // shared event
     },
+    {
+        type: "dice",
+        text: "The door looks fragile. Try to break it?",
+        rollText: "Strength Check",
+
+        success: {
+            threshold: 12,
+            nextStep: 2
+        },
+
+        fail: {
+            nextStep: 2
+        }
+    },
 
     // branching choice based on location
     {
