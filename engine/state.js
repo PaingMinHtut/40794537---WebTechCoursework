@@ -12,5 +12,6 @@ export const gameState = {
 
     flags: { ...defaultChoiceFlags },
 
-    choiceHistory: [] // NEW
+    choiceHistory: [], // NEW
+    _advantageUsed: false,
 };

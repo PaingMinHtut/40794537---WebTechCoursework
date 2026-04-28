@@ -288,25 +288,95 @@ window.goToNextChapter = function(chapterNumber) {
 };
 
 function handleDiceResult(step, roll) {
-    // Save last roll
-    gameState.lastRoll = roll;
+    const controls = document.getElementById("controls");
+    const textBox = document.getElementById("story-text");
 
-    // Optional: store history
+    const success = step.success && roll.total >= step.success.threshold;
+
+    // Save roll
+    gameState.lastRoll = roll.total;
+
     if (!gameState.rollHistory) gameState.rollHistory = [];
     gameState.rollHistory.push({
         chapter: gameState.chapter,
-        roll: roll
+        roll: roll.total
     });
 
-    // Determine outcome
-    if (step.success && roll.total >= step.success.threshold) {
-        gameState.step = step.success.nextStep;
-    } else if (step.fail) {
-        gameState.step = step.fail.nextStep;
-    } else {
-        gameState.step++;
+    // Clear controls while showing result
+    controls.innerHTML = "";
+
+    // ✅ SUCCESS
+    if (success) {
+        if (step.success.message) {
+            appendText(step.success.message);
+        }
+
+        wait(1200).then(() => {
+            gameState.step = step.success.nextStep;
+            saveGame(gameState);
+            renderStep();
+        });
+
+        return;
     }
 
-    saveGame(gameState);
-    renderStep();
+    // ❌ FAIL + ADVANTAGE
+    if (step.advantage && !gameState._advantageUsed) {
+        if (step.fail?.message) {
+            appendText(step.fail.message);
+        }
+
+        wait(1200).then(() => {
+            showAdvantageRetry(step);
+        });
+
+        return;
+    }
+
+    // ❌ FAIL (no retry)
+    if (step.fail?.message) {
+        appendText(step.fail.message);
+    }
+
+    wait(1200).then(() => {
+        gameState._advantageUsed = false;
+        gameState.step = step.fail?.nextStep ?? gameState.step + 1;
+
+        saveGame(gameState);
+        renderStep();
+    });
+}
+
+// advantage retry UI
+function showAdvantageRetry(step) {
+    const controls = document.getElementById("controls");
+
+    gameState._advantageUsed = true;
+
+    controls.innerHTML = `
+        <button id="retryRoll">${step.advantageText || "Try Again"}</button>
+        <button id="acceptFail">Accept Failure</button>
+    `;
+
+    document.getElementById("retryRoll").onclick = () => {
+        openDiceModal({
+            text: step.rollText || "Rolling...",
+            onResult: (roll) => {
+                handleDiceResult(step, roll);
+            }
+        });
+    };
+
+    document.getElementById("acceptFail").onclick = () => {
+        gameState._advantageUsed = false;
+        gameState.step = step.fail?.nextStep ?? gameState.step + 1;
+
+        saveGame(gameState);
+        renderStep();
+    };
+}
+
+// Simple utility to wait for a specified time (used for pacing)
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

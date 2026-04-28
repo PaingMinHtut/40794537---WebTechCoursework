@@ -4,6 +4,7 @@ const storySteps = [
         type: "text",
         text: "A strange presence watches you..." // shared event
     },
+    // choice roll example
     {
         type: "dice",
         text: "The door looks fragile. Try to break it?",
@@ -17,6 +18,26 @@ const storySteps = [
         fail: {
             nextStep: 2
         }
+    },
+    // choice roll with advantage example
+    {
+        type: "dice",
+        text: "Try to convince the guard to let you pass.",
+        rollText: "Persuasion Attempt",
+
+        success: {
+            threshold: 12,
+            nextStep: 3,
+            message: "The party successfully convinced the guards."
+        },
+
+        fail: {
+            nextStep: 3,
+            message: "The guards remain unconvinced."
+        },
+
+        advantage: true,
+        advantageText: "Try again with a better argument?"
     },
 
     // branching choice based on location

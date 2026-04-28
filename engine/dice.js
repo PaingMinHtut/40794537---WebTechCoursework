@@ -89,7 +89,7 @@ export function openDiceModal({ text = "Roll the dice!", onResult }) {
             setTimeout(() => {
                 modal.remove();
                 onResult(roll);
-            }, 800);
+            }, 2000);
 
         }, 1000);
     };
