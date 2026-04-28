@@ -14,4 +14,5 @@ export const gameState = {
 
     choiceHistory: [], // NEW
     _advantageUsed: false,
+    currentCombat: null,
 };

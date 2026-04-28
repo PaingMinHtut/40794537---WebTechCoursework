@@ -1,9 +1,10 @@
 import { gameState } from "../engine/state.js";
 
-import { showMenu } from "../screens/menu.js";
-import { showNewGame } from "../screens/newgame.js";
-import { showSaves } from "../screens/continue.js";
-import { showChoices } from "../screens/choices.js";
+import { showMenu } from "../screens/menuPage.js";
+import { showNewGame } from "../screens/newgamePage.js";
+import { showSaves } from "../screens/continuePage.js";
+import { showChoices } from "../screens/choicesPage.js";
+import { showCombat } from "../screens/combatPage.js";
 
 // Make navigation globally accessible (for onclick)
 window.navigate = function(screen) {
@@ -24,6 +25,9 @@ export function render() {
             break;
         case "choices":
             showChoices();
+            break;
+        case "combat":
+            showCombat();
             break;
     }
 }

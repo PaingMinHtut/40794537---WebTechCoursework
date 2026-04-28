@@ -4,6 +4,13 @@ const storySteps = [
         type: "text",
         text: "A strange presence watches you..." // shared event
     },
+    // combat example
+    {
+        type: "combat",
+        encounterId: "chapter2_food_department",
+        onWin: "after_food_fight",
+        onLose: "retry"
+    },
     // choice roll example
     {
         type: "dice",

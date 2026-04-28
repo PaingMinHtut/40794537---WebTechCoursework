@@ -1,9 +1,11 @@
 import { gameState } from "./state.js";
+import { render } from "../app.js";
 import { saveGame } from "./saveSystem.js";
 import { openDiceModal } from "../engine/dice.js";
 import { chapter1 } from "../story/chapter1.js";
 import { chapter2 } from "../story/chapter2.js";
 import { chapter3 } from "../story/chapter3.js";
+// expand story chapters later
 
 export function startStory() {
     const app = document.getElementById("app");
@@ -113,6 +115,12 @@ function renderStep() {
         };
     }
 
+    // Combat step
+    if (step.type === "combat") {
+        startCombat(step);
+        return;
+    }
+
     if (step.rendered) return;
     step.rendered = true;
 }
@@ -201,6 +209,7 @@ window.chooseOption = function(option) {
         if (gameState.chapter === 1) loadChapter(chapter1);
         if (gameState.chapter === 2) loadChapter(chapter2);
         if (gameState.chapter === 3) loadChapter(chapter3);
+        // expand later
 
         saveGame(gameState);
         startStory();
@@ -374,6 +383,23 @@ function showAdvantageRetry(step) {
         saveGame(gameState);
         renderStep();
     };
+}
+
+function startCombat(step) {
+    // Save combat context into gameState
+    gameState.currentCombat = {
+        encounterId: step.encounterId,
+        onWin: step.onWin,
+        onLose: step.onLose
+    };
+
+    // Switch screen
+    gameState.screen = "combat";
+
+    saveGame(gameState);
+
+    // Render combat screen
+    render();
 }
 
 // Simple utility to wait for a specified time (used for pacing)
