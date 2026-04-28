@@ -1,5 +1,3 @@
-// engine/dice.js
-
 export function rollD20() {
     return Math.floor(Math.random() * 20) + 1;
 }
@@ -39,7 +37,7 @@ export function rollAttack({
     };
 }
 
-export function openDiceModal({ text = "Roll the dice!", onResult }) {
+export function openDiceModal({ text = "Roll the dice!", rollFn, onResult }) {
     const modal = document.createElement("div");
     modal.className = "dice-modal";
 
@@ -65,6 +63,7 @@ export function openDiceModal({ text = "Roll the dice!", onResult }) {
 
         let rolls = 0;
 
+        // 🎲 Rolling animation
         const interval = setInterval(() => {
             display.innerText = Math.floor(Math.random() * 20) + 1;
             rolls++;
@@ -73,19 +72,22 @@ export function openDiceModal({ text = "Roll the dice!", onResult }) {
         setTimeout(() => {
             clearInterval(interval);
 
-            const roll = rollChoice();
+            // ✅ Use provided roll function OR fallback to choice roll
+            const roll = rollFn ? rollFn() : rollChoice();
+
             display.innerText = roll.total;
 
-            // reset
+            // Reset classes
             display.classList.remove("crit-success", "crit-fail");
 
-            // crit visuals
-            if (roll.isCritSuccess) {
+            // ✅ Handle BOTH systems (choice + attack)
+            if (roll.isCrit || roll.isCritSuccess) {
                 display.classList.add("crit-success");
-            } else if (roll.isCritFail) {
+            } else if (roll.isMiss || roll.isCritFail) {
                 display.classList.add("crit-fail");
             }
 
+            // Small delay before closing
             setTimeout(() => {
                 modal.remove();
                 onResult(roll);
@@ -93,6 +95,4 @@ export function openDiceModal({ text = "Roll the dice!", onResult }) {
 
         }, 1000);
     };
-    display.classList.add("rolling");
-    display.classList.remove("rolling");
 }
