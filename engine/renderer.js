@@ -386,7 +386,7 @@ function showAdvantageRetry(step) {
 }
 
 function startCombat(step) {
-    // Save combat context into gameState
+    // Save combat context
     gameState.currentCombat = {
         encounterId: step.encounterId,
         onWin: step.onWin,
@@ -398,8 +398,7 @@ function startCombat(step) {
 
     saveGame(gameState);
 
-    // Render combat screen
-    render();
+    render(); // just render combat screen
 }
 
 // Simple utility to wait for a specified time (used for pacing)

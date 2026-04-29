@@ -1,11 +1,19 @@
+import { applyStatus, STATUS } from "./statuses.js";
+
 export const moves = {
+
+    // ======================
+    // GROG
+    // ======================
+
     cleave: {
         name: "Cleave",
         type: "attack",
         target: "enemy",
         requiresRoll: true,
         threshold: 13,
-        description: "Deal 1 damage (2 on crit)"
+
+        getDamage: (roll) => roll.isCrit ? 2 : 1
     },
 
     reckless: {
@@ -14,7 +22,16 @@ export const moves = {
         target: "enemy",
         requiresRoll: true,
         threshold: 5,
-        description: "Deal 2 damage (3 on crit), lower AC"
+
+        getDamage: (roll) => roll.isCrit ? 3 : 2,
+
+        onHit: (user) => {
+            applyStatus(user, {
+                type: STATUS.RECKLESS,
+                duration: 1,
+                value: -7 // AC penalty
+            });
+        }
     },
 
     roar: {
@@ -22,7 +39,19 @@ export const moves = {
         type: "support",
         target: "self",
         requiresRoll: false,
-        description: "Force enemies to target Grog"
+
+        cooldown: 2,
+        currentCooldown: 0,
+        startLocked: false,
+
+        endsTurn: false,
+
+        onUse: (user) => {
+            applyStatus(user, {
+                type: STATUS.TAUNT,
+                duration: 1
+            });
+        }
     },
 
     rage: {
@@ -30,8 +59,24 @@ export const moves = {
         type: "support",
         target: "self",
         requiresRoll: false,
-        description: "+2 damage for 2 turns"
+
+        cooldown: 4,
+        currentCooldown: 4,
+        startLocked: true,
+
+        endsTurn: false,
+
+        onUse: (user) => {
+            applyStatus(user, {
+                type: STATUS.RAGE,
+                duration: 2
+            });
+        }
     },
+
+    // ======================
+    // LEO
+    // ======================
 
     mockery: {
         name: "Vicious Mockery",
@@ -39,7 +84,15 @@ export const moves = {
         target: "enemy",
         requiresRoll: true,
         threshold: 15,
-        description: "Damage + skip enemy turn"
+
+        getDamage: (roll) => roll.isCrit ? 2 : 1,
+
+        onHit: (user, target) => {
+            applyStatus(target, {
+                type: STATUS.DEPRESSED,
+                duration: 1
+            });
+        }
     },
 
     heal: {
@@ -47,7 +100,10 @@ export const moves = {
         type: "support",
         target: "ally",
         requiresRoll: false,
-        description: "Heal 1 HP"
+
+        onUse: (user, target) => {
+            target.currentHp = Math.min(target.maxHp, target.currentHp + 1);
+        }
     },
 
     inspire: {
@@ -55,7 +111,10 @@ export const moves = {
         type: "support",
         target: "party",
         requiresRoll: false,
-        description: "+3 attack rolls to ALL allies (2 turns)"
+
+        cooldown: 2,
+        currentCooldown: 0,
+        startLocked: false
     },
 
     hypnotic: {
@@ -64,8 +123,22 @@ export const moves = {
         target: "enemy",
         requiresRoll: true,
         threshold: 17,
-        description: "Skip enemy turns"
+
+        cooldown: 4,
+        currentCooldown: 4,
+        startLocked: true,
+
+        onHit: (user, target) => {
+            applyStatus(target, {
+                type: STATUS.HYPNOTIZED,
+                duration: 2
+            });
+        }
     },
+
+    // ======================
+    // RELLYNN
+    // ======================
 
     fireball: {
         name: "Fireball",
@@ -73,8 +146,10 @@ export const moves = {
         target: "enemy",
         requiresRoll: true,
         threshold: 13,
-        element: "burn",
-        description: "Apply Burn"
+
+        element: STATUS.BURN,
+
+        getDamage: (roll) => roll.isCrit ? 2 : 1
     },
 
     frost: {
@@ -83,8 +158,10 @@ export const moves = {
         target: "enemy",
         requiresRoll: true,
         threshold: 13,
-        element: "frost",
-        description: "Apply Frostbite"
+
+        element: STATUS.FROST,
+
+        getDamage: (roll) => roll.isCrit ? 2 : 1
     },
 
     lightning: {
@@ -93,8 +170,10 @@ export const moves = {
         target: "enemy",
         requiresRoll: true,
         threshold: 13,
-        element: "shock",
-        description: "Apply Shock"
+
+        element: STATUS.SHOCK,
+
+        getDamage: (roll) => roll.isCrit ? 2 : 1
     },
 
     missiles: {
@@ -102,6 +181,11 @@ export const moves = {
         type: "attack",
         target: "enemy",
         requiresRoll: false,
-        description: "Always hit (5 damage)"
+
+        cooldown: 4,
+        currentCooldown: 4,
+        startLocked: true,
+
+        getDamage: (roll) => (roll && roll.isCrit) ? 7 : 5
     }
 };

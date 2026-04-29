@@ -1,5 +1,6 @@
 import { party } from "../characters/party.js";
 import { enemies } from "../characters/enemies.js";
+import { encounters } from "./data/encounters.js";
 import { moves } from "./data/moves.js";
 import { rollAttack } from "../engine/dice.js";
 import { 
@@ -9,6 +10,7 @@ import {
     STATUS
 } from "./data/statuses.js";
 import { openDiceModal } from "../engine/dice.js";
+import { gameState } from "../engine/state.js";
 
 let combatState = {
     units: [],
@@ -17,7 +19,8 @@ let combatState = {
 };
 
 // Initialize combat
-function initCombat() {
+function initCombat(encounterId) {
+
     const partyUnits = Object.values(party).map(p => ({
         ...structuredClone(p),
         team: "player",
@@ -25,14 +28,42 @@ function initCombat() {
         statuses: []
     }));
 
-    const dummy = {
-        ...structuredClone(enemies.training_dummy),
-        team: "enemy",
-        currentHp: 999,
-        statuses: []
-    };
+    const enemyIds = encounters[encounterId];
 
-    combatState.units = [...partyUnits, dummy];
+    // Safety check (in case of invalid encounterId)
+    if (!enemyIds) {
+        console.error("Invalid encounterId:", encounterId);
+        return;
+    }
+    const enemyUnits = enemyIds.map(id => {
+        const e = enemies[id];
+
+        return {
+            ...e,
+            team: "enemy",
+            currentHp: e.hp,
+            statuses: []
+        };
+    });
+
+    combatState.units = [...partyUnits, ...enemyUnits];
+
+    combatState.units.forEach(unit => {
+
+        // Skip enemy units as they don't use the same move system as the player
+        if (!unit.moves) return;
+
+        unit.moves = unit.moves.map(moveId => {
+            const baseMove = moves[moveId];
+
+            return {
+                ...baseMove,
+                currentCooldown: baseMove.startLocked
+                    ? baseMove.cooldown
+                    : 0
+            };
+        });
+    });
 
     combatState.turnOrder = [...combatState.units].sort(
         (a, b) => b.initiative - a.initiative
@@ -69,7 +100,9 @@ export function showCombat() {
         </div>
     `;
 
-    initCombat();
+    const encounterId = gameState.currentCombat.encounterId;
+
+    initCombat(encounterId);
     renderUnits();
     renderTurnBar();
     startTurn();
@@ -128,6 +161,14 @@ function renderUnits() {
 function startTurn() {
     const unit = combatState.turnOrder[combatState.turnIndex];
 
+    // 💀 Skip dead allies
+    if (unit.team === "player" && unit.currentHp <= 0) {
+        nextTurn();
+        return;
+    }
+
+    reduceCooldowns(unit); // ✅ NEW
+
     const { skipTurn } = processStatuses(unit, log);
 
     renderTurnBar();
@@ -137,7 +178,11 @@ function startTurn() {
         return;
     }
 
-    renderCharacterPanel(unit);
+    if (unit.team === "enemy") {
+        runEnemyTurn(unit);
+    } else {
+        renderCharacterPanel(unit);
+    }
 }
 
 function renderCharacterPanel(unit) {
@@ -151,11 +196,15 @@ function renderCharacterPanel(unit) {
 
     actionsRow.innerHTML = "";
 
-    unit.moves.forEach(moveId => {
-        const move = moves[moveId];
+    unit.moves.forEach(move => {
 
         const btn = document.createElement("button");
         btn.innerText = move.name;
+
+        if (move.currentCooldown > 0) {
+            btn.disabled = true;
+            btn.innerText += ` (${move.currentCooldown})`;
+        }
 
         // Hover tooltip
         btn.onmouseenter = () => {
@@ -199,49 +248,36 @@ function selectTarget(user, move) {
 
 function executeMove(user, target, move) {
 
-    // 🎲 ATTACK ROLL
+    // 🎲 IF ROLL REQUIRED
     if (move.requiresRoll) {
 
         openDiceModal({
-            text: `${user.name} attacks!`,
+            text: `${user.name} uses ${move.name}!`,
             rollFn: () => rollAttack({
                 attackBonus: getAttackBonus(user),
                 targetAC: target.ac
             }),
-            onResult: (result) => {
-                log(`${user.name} rolled ${result.total}`);
+            onResult: (roll) => {
 
-                if (!result.hit) {
+                log(`${user.name} rolled ${roll.total}`);
+
+                if (!roll.hit) {
                     log("Miss!");
-                    nextTurn();
+                    if (move.endsTurn !== false) nextTurn();
                     return;
                 }
 
-                log(result.isCrit ? "Critical Hit!" : "Hit!");
+                log(roll.isCrit ? "Critical Hit!" : "Hit!");
 
-                applyMoveEffect(user, target, move);
-
-                renderUnits();
-                nextTurn();
+                applyMove(user, target, move, roll);
             }
         });
 
-        log(`${user.name} rolls ${result.total}`);
-
-        if (!result.hit) {
-            log("Miss!");
-            nextTurn();
-            return;
-        }
-
-        log(result.isCrit ? "Critical Hit!" : "Hit!");
+        return;
     }
 
-    applyMoveEffect(user, target, move);
-
-    renderUnits();
-
-    nextTurn();
+    // ⚡ NO ROLL (like Magic Missiles, Rage, Roar)
+    applyMove(user, target, move, null);
 }
 
 function handleMove(user, move) {
@@ -284,23 +320,13 @@ function handleMove(user, move) {
     selectTarget(user, move);
 }
 
-function applyMoveEffect(user, target, move) {
-    let damage = 1;
+function applyMove(user, target, move, roll) {
 
-    // 🔥 ELEMENTAL SYSTEM
-    if (move.element) {
-        const reaction = tryElementalReaction(target, move.element);
+    let damage = 0;
 
-        if (reaction) {
-            damage += reaction.bonusDamage;
-            log(`${reaction.type.toUpperCase()} triggered!`);
-        } else {
-            applyStatus(target, {
-                type: move.element,
-                duration: 2,
-                value: 1
-            });
-        }
+    // 🎯 DAMAGE
+    if (move.getDamage) {
+        damage = move.getDamage(roll);
     }
 
     // 💪 RAGE BONUS
@@ -308,9 +334,32 @@ function applyMoveEffect(user, target, move) {
         damage += 2;
     }
 
-    target.currentHp -= damage;
+    if (damage > 0) {
+        target.currentHp -= damage;
+        log(`${user.name} deals ${damage} damage to ${target.name}`);
+        handleDeath();
+    }
 
-    log(`${user.name} dealt ${damage} damage to ${target.name}`);
+    // ✨ ON HIT EFFECTS
+    if (move.onHit && target) {
+        move.onHit(user, target, roll);
+    }
+
+    // ⚡ ON USE (for support moves)
+    if (move.onUse) {
+        move.onUse(user, target);
+    }
+
+    if (move.cooldown) {
+        move.currentCooldown = move.cooldown;
+    }
+
+    renderUnits();
+
+    // 🔚 TURN CONTROL
+    if (move.endsTurn !== false) {
+        nextTurn();
+    }
 }
 
 function getAttackBonus(unit) {
@@ -332,6 +381,137 @@ function clearTargetSelection() {
     });
 }
 
+function reduceCooldowns(unit) {
+    unit.moves.forEach(move => {
+        if (move.currentCooldown > 0) {
+            move.currentCooldown--;
+        }
+    });
+}
+
+function runEnemyTurn(enemy) {
+
+    log(`${enemy.name}'s turn`);
+
+    // ⏳ Small delay for feel
+    setTimeout(() => {
+
+        if (enemy.type === "basic") {
+            basicEnemyAI(enemy);
+        }
+
+        if (enemy.type === "elite") {
+            eliteEnemyAI(enemy);
+        }
+
+    }, 600);
+}
+
+function getTarget(enemy) {
+    const players = combatState.units.filter(u => u.team === "player" && u.currentHp > 0);
+
+    // 🎯 Check for TAUNT
+    const tauntTarget = players.find(p =>
+        p.statuses.some(s => s.type === STATUS.TAUNT)
+    );
+
+    if (tauntTarget) return tauntTarget;
+
+    // 🎲 Random target
+    return players[Math.floor(Math.random() * players.length)];
+}
+
+function basicEnemyAI(enemy) {
+
+    const target = getTarget(enemy);
+
+    const roll = rollAttack({
+        attackBonus: 0,
+        targetAC: target.ac
+    });
+
+    log(`${enemy.name} attacks ${target.name}`);
+    log(`Roll: ${roll.total}`);
+
+    if (!roll.hit) {
+        log("Miss!");
+        return endEnemyTurn();
+    }
+
+    let damage = 1;
+
+    // 🎲 Damage distribution
+    const rand = Math.random();
+
+    if (roll.isCrit) {
+        damage = 3;
+    } else if (rand < 0.33) { // 1/3 chance for 2 damage
+        damage = 2;
+    } else { // 2/3 chance for 1 damage
+        damage = 1;
+    }
+
+    target.currentHp -= damage;
+    handleDeath();
+
+    log(`${enemy.name} deals ${damage} damage to ${target.name}`);
+
+    renderUnits();
+
+    endEnemyTurn();
+}
+
+function eliteEnemyAI(enemy) {
+
+    const target = getTarget(enemy);
+
+    // 50% chance to use special
+    const useSpecial = Math.random() < 0.5 && enemy.specialMove;
+
+    if (useSpecial) {
+        log(`${enemy.name} uses ${enemy.specialMove.name}!`);
+
+        const roll = rollAttack({
+            attackBonus: 0,
+            targetAC: target.ac
+        });
+
+        log(`Roll: ${roll.total}`);
+
+        if (!roll.hit) {
+            log("Miss!");
+            return endEnemyTurn();
+        }
+
+        let damage = enemy.specialMove.getDamage
+            ? enemy.specialMove.getDamage(roll)
+            : 2;
+
+        target.currentHp -= damage;
+        handleDeath();
+
+        log(`${enemy.name} deals ${damage} damage to ${target.name}`);
+
+        if (enemy.specialMove.onHit) {
+            enemy.specialMove.onHit(target);
+        }
+
+    } else {
+        basicEnemyAI(enemy);
+        return; // already ends turn
+    }
+
+    renderUnits();
+
+    endEnemyTurn();
+}
+
+function endEnemyTurn() {
+    setTimeout(() => {
+        nextTurn();
+    }, 800);
+}
+
 function nextTurn() {
     combatState.turnIndex++;
 
@@ -340,6 +520,36 @@ function nextTurn() {
     }
 
     startTurn();
+}
+
+function handleDeath() {
+
+    // Remove dead enemies
+    combatState.units = combatState.units.filter(unit => {
+        if (unit.team === "enemy" && unit.currentHp <= 0) {
+            log(`${unit.name} is defeated!`);
+            return false;
+        }
+        return true;
+    });
+
+    // Rebuild turn order (VERY IMPORTANT)
+    combatState.turnOrder = combatState.units
+        .filter(u => u.currentHp > 0 || u.team === "player")
+        .sort((a, b) => b.initiative - a.initiative);
+
+    // Fix turn index if needed
+    if (combatState.turnIndex >= combatState.turnOrder.length) {
+        combatState.turnIndex = 0;
+    }
+
+    // 🏆 Check win condition
+    const enemiesAlive = combatState.units.some(u => u.team === "enemy");
+
+    if (!enemiesAlive) {
+        log("Victory!");
+        // !! TODO: return to story !!
+    }
 }
 
 function log(text) {
