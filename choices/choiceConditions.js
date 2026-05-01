@@ -1,5 +1,7 @@
 export const defaultChoiceFlags = {
     askedForOJ: false,
-    wentToClothing: false,
-    wentToHardware: false
+    convincedGreta: false,
+    intimidatedJerry: false,
+    keptStaff: false,
+    brokeStaff: false,
 };

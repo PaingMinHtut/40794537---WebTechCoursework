@@ -5,7 +5,8 @@ import { openDiceModal } from "../engine/dice.js";
 import { chapter1 } from "../story/chapter1.js";
 import { chapter2 } from "../story/chapter2.js";
 import { chapter3 } from "../story/chapter3.js";
-// expand story chapters later
+import { chapter4 } from "../story/chapter4.js";
+import { npcs } from "../characters/npcs.js";
 
 export function startStory() {
     const app = document.getElementById("app");
@@ -17,10 +18,10 @@ export function startStory() {
         </div>
     `;
 
-    // 🧠 Reset rendered flags (important)
+    // Reset rendered flags
     currentStorySteps.forEach(step => step.rendered = false);
 
-    // 🧠 Replay all previous steps
+    // Replay all previous steps
     for (let i = 0; i < gameState.step; i++) {
         renderPastStep(i);
     }
@@ -121,6 +122,20 @@ function renderStep() {
         return;
     }
 
+    if (step.type === "returnToMenu") {
+        appendText(resolveText(step.text || "Return to main menu?"));
+
+        controls.innerHTML = `
+            <button id="returnMenuBtn">
+                ${step.buttonText || "Return to Main Menu"}
+            </button>
+        `;
+
+        document.getElementById("returnMenuBtn").onclick = () => {
+            returnToMenu();
+        };
+    }
+
     if (step.rendered) return;
     step.rendered = true;
 }
@@ -138,11 +153,16 @@ function appendDialogue(speaker, text) {
     const wrapper = document.createElement("div");
     wrapper.className = `dialogue ${isAlly ? "left" : "right"}`;
 
-    const portrait = document.createElement("div");
-    portrait.className = "portrait";
+    // Get portrait filename
+    const portraitFile = getPortrait(speaker);
+
+    const portrait = document.createElement("img");
+    portrait.className = "portrait-img";
+    portrait.src = `assets/portraits/${portraitFile}`;
 
     const name = document.createElement("div");
-    name.innerText = speaker;
+    name.className = "name";
+    name.innerText = getDisplayName(speaker);
 
     const character = document.createElement("div");
     character.className = "character";
@@ -165,6 +185,45 @@ function appendDialogue(speaker, text) {
     textBox.scrollTop = textBox.scrollHeight;
 }
 
+function getPortrait(speaker) {
+
+    // Party
+    const partyPortraits = {
+        "Grog": "grog.png",
+        "Leo": "leo.png",
+        "Rellynn": "rellynn.png"
+    };
+
+    if (partyPortraits[speaker]) {
+        return partyPortraits[speaker];
+    }
+
+    // NPCs
+    if (npcs[speaker]) {
+        return npcs[speaker].portrait;
+    }
+
+    // fallback
+    return "unknown.png";
+}
+
+function getDisplayName(speaker) {
+
+    const partyNames = {
+        "Grog": "Grog",
+        "Leo": "Leo",
+        "Rellynn": "Rellynn"
+    };
+
+    if (partyNames[speaker]) return partyNames[speaker];
+
+    if (npcs[speaker]) {
+        return npcs[speaker].name;
+    }
+
+    return speaker;
+}
+
 /* Normal text */
 function appendText(text) {
     const textBox = document.getElementById("story-text");
@@ -185,23 +244,18 @@ window.nextStep = function() {
 
 window.chooseOption = function(option) {
 
-    // ✅ Record choice (NEW SYSTEM)
+    // Record choice
     gameState.choiceHistory.push({
         chapter: gameState.chapter,
         text: option.log || option.label
     });
 
-    // ✅ Apply effect
+    // Apply effect
     if (option.effect) {
         option.effect(gameState);
     }
 
-    // ✅ Location change
-    if (option.setLocation) {
-        gameState.location = option.setLocation;
-    }
-
-    // ✅ Chapter change
+    // Chapter change
     if (option.nextChapter) {
         gameState.chapter = option.nextChapter;
         gameState.step = 0;
@@ -209,14 +263,14 @@ window.chooseOption = function(option) {
         if (gameState.chapter === 1) loadChapter(chapter1);
         if (gameState.chapter === 2) loadChapter(chapter2);
         if (gameState.chapter === 3) loadChapter(chapter3);
-        // expand later
+        if (gameState.chapter === 4) loadChapter(chapter4);
 
         saveGame(gameState);
         startStory();
         return;
     }
 
-    // ✅ Normal progression
+    // Normal progression
     gameState.step = option.nextStep;
     saveGame(gameState);
     renderStep();
@@ -252,6 +306,17 @@ window.submitName = function() {
     renderStep();
 };
 
+window.returnToMenu = function () {
+    // Save before leaving
+    saveGame(gameState);
+
+    // Reset transient stuff if needed
+    gameState._advantageUsed = false;
+
+    // Go back to menu
+    navigate("menu");
+};
+
 // Used when replaying past steps (like when loading a save)
 function renderPastStep(index) {
     const step = currentStorySteps[index];
@@ -276,9 +341,7 @@ function renderPastStep(index) {
         }
     }
 
-    // ❗ Skip interactive steps when replaying
-    // (input, choice, nextChapter)
-
+    // Skip interactive steps when replaying
     step.rendered = true;
 }
 
@@ -290,7 +353,8 @@ window.goToNextChapter = function(chapterNumber) {
     if (chapterNumber === 1) loadChapter(chapter1);
     if (chapterNumber === 2) loadChapter(chapter2);
     if (chapterNumber === 3) loadChapter(chapter3);
-    // expand later
+    if (chapterNumber === 4) loadChapter(chapter4);
+
 
     saveGame(gameState);
     startStory();
@@ -298,11 +362,9 @@ window.goToNextChapter = function(chapterNumber) {
 
 function handleDiceResult(step, roll) {
     const controls = document.getElementById("controls");
-    const textBox = document.getElementById("story-text");
 
     const success = step.success && roll.total >= step.success.threshold;
 
-    // Save roll
     gameState.lastRoll = roll.total;
 
     if (!gameState.rollHistory) gameState.rollHistory = [];
@@ -311,11 +373,24 @@ function handleDiceResult(step, roll) {
         roll: roll.total
     });
 
-    // Clear controls while showing result
     controls.innerHTML = "";
 
-    // ✅ SUCCESS
+    // SUCCESS
     if (success) {
+        // record history
+        if (step.success.log) {
+            gameState.choiceHistory.push({
+                chapter: gameState.chapter,
+                text: step.success.log
+            });
+        }
+
+        // apply effect
+        if (step.success.effect) {
+            step.success.effect(gameState);
+        }
+
+        // show story message if you add one later
         if (step.success.message) {
             appendText(step.success.message);
         }
@@ -329,10 +404,10 @@ function handleDiceResult(step, roll) {
         return;
     }
 
-    // ❌ FAIL + ADVANTAGE
+    // FAIL + ADVANTAGE
     if (step.advantage && !gameState._advantageUsed) {
-        if (step.fail?.message) {
-            appendText(step.fail.message);
+        if (step.fail?.log) {
+            appendText(step.fail.log);
         }
 
         wait(1200).then(() => {
@@ -342,9 +417,24 @@ function handleDiceResult(step, roll) {
         return;
     }
 
-    // ❌ FAIL (no retry)
+    // FAIL (no retry)
+    if (step.fail?.log) {
+        gameState.choiceHistory.push({
+            chapter: gameState.chapter,
+            text: step.fail.log
+        });
+    }
+
+    if (step.fail?.effect) {
+        step.fail.effect(gameState);
+    }
+
     if (step.fail?.message) {
         appendText(step.fail.message);
+    }
+
+    if (step.fail?.effect) {
+        step.fail.effect(gameState);
     }
 
     wait(1200).then(() => {
@@ -398,7 +488,7 @@ function startCombat(step) {
 
     saveGame(gameState);
 
-    render(); // just render combat screen
+    render(); // render combat screen
 }
 
 // Simple utility to wait for a specified time (used for pacing)

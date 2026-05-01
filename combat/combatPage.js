@@ -165,12 +165,12 @@ function renderUnits() {
         el.className = "unit";
         el.dataset.id = unit.id;
 
-        // 🖼 Portrait
+        // Portrait
         const img = document.createElement("img");
         img.src = `assets/portraits/${unit.portrait}`;
         img.className = "portrait-img";
 
-        // ❤️ HP text
+        // HP text
         const hpBar = document.createElement("div");
         hpBar.className = "hp-bar";
 
@@ -183,7 +183,7 @@ function renderUnits() {
         hpBar.appendChild(hpFill);
         el.appendChild(hpBar);
 
-        // ✨ STATUS ICONS
+        // STATUS ICONS
         const statusBar = document.createElement("div");
         statusBar.className = "status-bar";
 
@@ -213,12 +213,12 @@ function startTurn() {
 
     console.log("TURN:", unit.name, unit.team);
 
-    // ❗ APPLY COOLDOWN REDUCTION HERE
+    // APPLY COOLDOWN REDUCTION HERE
     if (unit.moves) {
         reduceCooldowns(unit);
     }
 
-    // 💀 DEAD PLAYER → skip but KEEP in turn order
+    // DEAD PLAYER → skip but KEEP in turn order
     if (unit.team === "player" && unit.currentHp <= 0) {
         setTimeout(nextTurn, 600);
         return;
@@ -245,7 +245,7 @@ function startTurn() {
 
 function renderCharacterPanel(unit) {
     document.getElementById("charName").innerText = unit.name;
-    
+
     document.querySelectorAll(".unit").forEach(el => {
         el.style.pointerEvents = "auto";
     });
@@ -277,7 +277,6 @@ function renderCharacterPanel(unit) {
             tooltip.innerText = "";
         };
 
-        // Click (basic test flow)
         btn.onclick = () => {
             handleMove(unit, move);
         };
@@ -347,7 +346,7 @@ function executeMove(user, target, move) {
 
 function handleMove(user, move) {
 
-    // 🟢 PARTY BUFF
+    // PARTY BUFF
     if (move.target === "party") {
         combatState.units
             .filter(u => u.team === "player")
@@ -363,54 +362,54 @@ function handleMove(user, move) {
         return;
     }
 
-    // 🟢 SELF
+    // SELF
     if (move.target === "self") {
         applyMove(user, user, move, null);
         return;
     }
 
-    // ⚔️ TARGET
+    // TARGET
     selectTarget(user, move);
 }
 
 function applyMove(user, target, move, roll) {
 
-    // 🎯 LOG MOVE NAME
+    // LOG MOVE NAME
     log(`${user.name} uses ${move.name}!`);
 
     let damage = 0;
 
-    // 🎯 DAMAGE
+    // DAMAGE
     if (move.getDamage) {
         damage = move.getDamage(roll);
     }
 
-    // 💪 RAGE BONUS
+    // RAGE BONUS
     if (user.statuses.some(s => s.type === STATUS.RAGE)) {
         damage += 2;
     }
 
-    // 💥 APPLY DAMAGE
+    // APPLY DAMAGE
     if (damage > 0 && target) {
         target.currentHp -= damage;
         log(`${user.name} deals ${damage} damage to ${target.name}`);
     }
 
-    // ⚡ ELEMENTAL REACTION (VERY IMPORTANT)
+    // ELEMENTAL REACTION (VERY IMPORTANT)
     if (move.element && target) {
         tryElementalReaction(target, move.element, log);
     }
 
-    // ✨ ON HIT
+    // ON HIT
     if (move.onHit && target) {
         move.onHit(user, target, roll);
     }
 
-    // ✨ ON USE
+    // ON USE
     if (move.onUse) {
         move.onUse(user, target);
 
-        // 🔥 CUSTOM LOGS (NOW YOU CAN IDENTIFY MOVES)
+        // CUSTOM LOGS (NOW YOU CAN IDENTIFY MOVES)
         if (move.name === "Unbridled Rage") {
             log(`${user.name} is going on a rampage!`);
         }
@@ -424,7 +423,7 @@ function applyMove(user, target, move, roll) {
         }
     }
 
-    // 🧊 COOLDOWN APPLY (ALWAYS)
+    // COOLDOWN APPLY (ALWAYS)
     if (move.cooldown) {
         move.currentCooldown = move.cooldown;
     }
@@ -494,7 +493,7 @@ function runEnemyTurn(enemy) {
             eliteEnemyAI(enemy);
         }
 
-    }, 800); // ⏳ increased delay
+    }, 800); // increased delay
 }
 
 function getTarget(enemy) {
@@ -535,7 +534,7 @@ function basicEnemyAI(enemy) {
 
     if (!roll.hit) {
         log("Miss!");
-        return endEnemyTurn(); // ✅ REQUIRED
+        return endEnemyTurn();
     }
 
     let damage;
@@ -580,7 +579,7 @@ function eliteEnemyAI(enemy) {
 
         if (!roll.hit) {
             log("Miss!");
-            return endEnemyTurn(); // ✅ REQUIRED
+            return endEnemyTurn();
         }
 
         const damage = enemy.specialMove.getDamage
@@ -598,17 +597,17 @@ function eliteEnemyAI(enemy) {
         handleDeath();
         renderUnits();
 
-        endEnemyTurn(); // ✅ REQUIRED
+        endEnemyTurn();
 
     } else {
-        return basicEnemyAI(enemy); // already ends turn
+        return basicEnemyAI(enemy);
     }
 }
 
 function endEnemyTurn() {
     setTimeout(() => {
         nextTurn();
-    }, 1000); // ⏳ slower transition
+    }, 1000);
 }
 
 function nextTurn() {
@@ -638,7 +637,7 @@ function clearActionUI() {
 
 function handleDeath() {
 
-    // 💀 ENEMY DEATH
+    // ENEMY DEATH
     combatState.units = combatState.units.filter(unit => {
         if (unit.team === "enemy" && unit.currentHp <= 0) {
             log(`${unit.name} is defeated!`);
@@ -647,7 +646,7 @@ function handleDeath() {
         return true;
     });
 
-    // 💀 ALLY DEATH (DO NOT REMOVE)
+    // ALLY DEATH (DO NOT REMOVE)
     combatState.units.forEach(unit => {
         if (unit.team === "player" && unit.currentHp <= 0 && !unit._deadLogged) {
             log(`${unit.name} has fallen!`);
@@ -655,11 +654,11 @@ function handleDeath() {
         }
     });
 
-    // 🔄 REBUILD TURN ORDER (KEEP DEAD ALLIES)
+    // REBUILD TURN ORDER (KEEP DEAD ALLIES)
     combatState.turnOrder = combatState.units
         .sort((a, b) => b.initiative - a.initiative);
 
-    // 🏆 WIN CHECK
+    // WIN CHECK
     const enemiesAlive = combatState.units.some(u => u.team === "enemy");
 
     if (!enemiesAlive) {
@@ -667,7 +666,7 @@ function handleDeath() {
         return;
     }
 
-    // 💀 LOSE CHECK
+    // LOSE CHECK
     const alliesAlive = combatState.units.some(
         u => u.team === "player" && u.currentHp > 0
     );

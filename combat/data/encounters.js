@@ -4,10 +4,15 @@ export const encounters = {
         "cola",
         "doritos",
         "oreo",
-        "hot_pocket"
+        "pizza_roll"
     ],
 
-    test_single: [
-        "cola"
+    chapter3_final_boss: [
+        "toy_dragon"
+    ],
+
+    chapter3_jerry: [
+        "jerry"
     ]
+
 };

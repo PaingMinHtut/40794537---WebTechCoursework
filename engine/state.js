@@ -5,7 +5,6 @@ export const gameState = {
     chapter: null,
     step: 0,
     partyName: "",
-    inventory: [],
     allies: ["Grog", "Leo", "Rellynn"],
 
     saveId: null,

@@ -2,14 +2,11 @@ import { applyStatus, STATUS } from "../combat/data/statuses.js";
 
 export const enemies = {
 
-    // =====================================
-    // Food Dept Enemies
-    // =====================================
     cola: {
         id: "cola",
         name: "Can o' Coca Cola",
         portrait: "cola.png",
-        hp: 3,
+        hp: 1,
         initiative: 3,
         type: "basic"
     },
@@ -18,7 +15,7 @@ export const enemies = {
         id: "doritos",
         name: "Doritos Bag",
         portrait: "doritos.png",
-        hp: 2,
+        hp: 1,
         initiative: 9,
         type: "basic"
     },
@@ -27,16 +24,16 @@ export const enemies = {
         id: "oreo",
         name: "Oreo Cookie",
         portrait: "oreo.png",
-        hp: 3,
+        hp: 1,
         initiative: 5,
         type: "basic"
     },
 
-    hot_pocket: {
-        id: "hot_pocket",
-        name: "Lava Hot Pocket",
-        portrait: "hot pocket.png",
-        hp: 5,
+    pizza_roll: {
+        id: "pizza_roll",
+        name: "Pizza Roll",
+        portrait: "pizzaroll.png",
+        hp: 1,
         initiative: 5,
         type: "elite",
 
@@ -44,6 +41,30 @@ export const enemies = {
             name: "Spray Lava",
             requiresRoll: true,
             threshold: 12,
+
+            getDamage: (roll) => roll.isCrit ? 3 : 2,
+
+            onHit: (target) => {
+                applyStatus(target, {
+                    type: STATUS.BURN,
+                    duration: 2
+                });
+            }
+        }
+    },
+
+    toy_dragon: {
+        id: "toy_dragon",
+        name: "Dragon",
+        portrait: "dragon.png",
+        hp: 1,
+        initiative: 9,
+        type: "elite",
+
+        specialMove: {
+            name: "Breathe Fire",
+            requiresRoll: true,
+            threshold: 15,
 
             getDamage: (roll) => roll.isCrit ? 4 : 2,
 
@@ -54,5 +75,15 @@ export const enemies = {
                 });
             }
         }
-    }
+    },
+
+    // HP and initative point very intentionally set to 1, as Jerry is meant to be a pathetic side character who thinks he's tough
+    jerry: {
+        id: "jerry",
+        name: "Jerry",
+        portrait: "jerry.png",
+        hp: 1,
+        initiative: 1,
+        type: "basic"
+    },
 };

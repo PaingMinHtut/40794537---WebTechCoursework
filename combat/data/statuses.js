@@ -1,5 +1,3 @@
-// combat/data/statuses.js
-
 // =======================
 // STATUS DEFINITIONS
 // =======================
@@ -51,7 +49,7 @@ export function processStatuses(unit, log) {
     unit.statuses.forEach(status => {
         switch (status.type) {
 
-            // 🔥 DAMAGE OVER TIME
+            // DAMAGE OVER TIME
             case STATUS.BURN:
             case STATUS.FROST:
             case STATUS.SHOCK:
@@ -60,7 +58,7 @@ export function processStatuses(unit, log) {
                 log(`${unit.name} takes ${dmg} damage from ${status.type}`);
                 break;
 
-            // 🧠 TURN SKIP
+            // TURN SKIP
             case STATUS.DEPRESSED:
             case STATUS.HYPNOTIZED:
                 skipTurn = true;

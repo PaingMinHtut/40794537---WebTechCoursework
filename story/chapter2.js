@@ -13,12 +13,12 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
+        speaker: "loudspeaker",
         text: `SO, JERRY! YOU'VE FINALLY DECIDED TO GROW A PAIR AND COME FACE ME, HUH? AND IT SEEMS YOU BROUGHT SOME FRIENDS WITH YOU THIS TIME! WELL, LET ME TELL YOU SOMETHING. NONE OF YOU ARE GONNA MAKE IT OUT OF HERE ALIVE!`
     },
     {
         type: "dialogue",
-        lines:[
+        lines: [
             {
                 speaker: "Grog",
                 text: `Gah!`
@@ -32,14 +32,14 @@ const storySteps = [
                 text: `By the gods! Who is that?`
             },
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `T-that's the owner of this place... He's the one who's been causing all the trouble in town.`
             }
         ]
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
+        speaker: "loudspeaker",
         text: `YEAH, THAT'S RIGHT! AND YOU ARE ALL GONNA DIE HERE! BUT FIRST, LET ME INTRODUCE SOME OF MY MINIONS TO YOU!`
     },
     {
@@ -48,7 +48,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
+        speaker: "loudspeaker",
         text: `FIRST UP, COCA COLA!`
     },
     {
@@ -57,7 +57,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
+        speaker: "loudspeaker",
         text: `NEXT, DORITOS!`
     },
     {
@@ -66,7 +66,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
+        speaker: "loudspeaker",
         text: `AND THAT'S NOT ALL, FOLKS! HERE COMES THE OREO COOKIE!`
     },
     {
@@ -75,7 +75,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
+        speaker: "loudspeaker",
         text: `AND LAST BUT NOT LEAST! THE TOMATO-LAVA SPRAYING PIZZA ROLL!`
     },
     {
@@ -84,12 +84,92 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
+        speaker: "loudspeaker",
+        text: `OH, WAIT! HOW COULD I FORGET? THERE'S ALSO MY MOST LOYAL SERVANT!`
+    },
+    {
+        type: "text",
+        text: `A half-orc woman steps into the scene with a tired, sleep-deprived look on her face. Grog immediately recognizes her.`
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Grog",
+                text: `G-Greta..! Is that you..? You're with them?!`
+            },
+            {
+                speaker: "Rellynn",
+                text: `Grog. That's your sister?!`
+            },
+            {
+                speaker: "Leo",
+                text: `What an interesting turn of events.`
+            },
+        ]
+    },
+    {
+        type: "dialogue",
+        speaker: "loudspeaker",
         text: `GO, MY MINIONS! DESTROY THEM!!`
     },
     {
         type: "text",
-        text: `The monstrous food items swarm the party. The party prepares for combat, while Jerry cowers pathetically in the background.`
+        text: `A panicking Grog starts begging his long-lost sister not to fight them.`
+    },
+    {
+        type: "dialogue",
+        speaker: "Grog",
+        text: `Greta, please! Don't let us fight you! You can still leave!`
+    },
+    {
+        type: "text",
+        text: `Greta does not respond. She approaches the party alongside the monstrous food items. Regardless, Grog could tell she is tired of working at this place, and is slightly reluctant to fight her long-lost brother.`
+    },
+    {
+        type: "dice",
+        text: `Grog could convince his sister to leave Walmart.`,
+        rollText: `Persuasion Attempt`,
+
+        success: {
+            threshold: 6,
+            nextStep: 23,
+            log: `Grog successfully convinced his sister to leave Walmart.`,
+            effect: (state) => {
+                    state.flags.convincedGreta = true;
+            },
+        },
+
+        fail: {
+            nextStep: 23,
+            log: `Greta remained unconvinced, but refused to fight her brother regardless.`
+        },
+    },
+
+    // Convinced Greta to leave
+    {
+        type: "dialogue",
+        speaker: "Grog",
+        text: `It's not too late, Greta. Please leave this place! I don't want to fight you!`
+    },
+    {
+        type: "text",
+        text: (state) => {
+            if (state.flags.convincedGreta) {
+                return `Greta does not respond, but is fully convinced. She looks up at the loudspeaker on the ceiling with a fierce, determined look on her face. She yanks out her Walmart employee badge and throws it onto the floor. She turns around and heads towards the exit, acknowledging her brother on her way out. She whispered into his ears, promising to meet again somewhere, someday.`;
+            } else {
+                return `Greta does not respond, but stops at the last second. She could not dare to fight her brother, but she also couldn't let herself go. She retreats further into the Walmart, disappearing from view. Grog looks on in sadness as his sister could not even look at him in the face.`;
+            }
+        },
+    },
+    {
+        type: "dialogue",
+        speaker: "loudspeaker",
+        text: `WELL, WELL, WELL. GRETA. YOU WERE THE EMPLOYEE OF THE MONTH AND YET, YOU DARE TO DISOBEY ME!? PFFT! NO MATTER! I STILL HAVE MY MONSTROUS MINIONS!`
+    },
+    {
+        type: "text",
+        text: `The monstrous food items swarm the party. The party prepares for combat, while jerry cowers pathetically in the background.`
     },
     {
         type: "text",
@@ -98,17 +178,17 @@ const storySteps = [
     {
         type: "combat",
         encounterId: "chapter2_food_department",
-        onWin: 20,
+        onWin: 29,
         onLose: "retry"
     },
     {
         type: "text",
-        text: "A triumphant victory! The party defeated the monstrous food items, but the war is far from over. The loudspeaker's voice echoes once again."
+        text: `A triumphant victory! The party defeated the monstrous food items, but the war is far from over. The loudspeaker's voice echoes once again.`
     },
     {
         type: "dialogue",
-        speaker: "Loudspeaker",
-        text: `HAHAHA! NOT BAD, NOT BAD AT ALL! BUT YOU'VE ONLY JUST BEGUN TO SCRATCH THE SURFACE OF MY POWER! IF YOU THINK THAT WAS TOUGH, WAIT UNTIL YOU SEE WHAT'S IN STORE FOR YOU IN THE NEXT DEPARTMENTS!`
+        speaker: "loudspeaker",
+        text: `NOOOO! MY MINIONS! TCH! BRAVO, JERRY! I'LL BE WAITING FOR YOU IN THE NEXT DEPARTMENT WITH MY GREATEST CREATION! AND THEN, WE WILL KILL YOU AND YOUR FRIENDS!`
     },
     {
         type: "text",
@@ -116,7 +196,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        lines:[
+        lines: [
             {
                 speaker: "Leo",
                 text: `Gods, that was intense!`
@@ -129,84 +209,30 @@ const storySteps = [
     },
     {
         type: "text",
-        text: "Jerry comes out of hiding."
+        text: `jerry comes out of hiding.`
     },
     {
         type: "dialogue",
-        lines: 
-        [
+        lines: [
             {
-                speaker: "Jerry",
-                text: "H-hey. I-i-is it over? G-g-great job, everyone..!"
+                speaker: "jerry",
+                text: `H-hey. I-i-is it over? G-g-great job, everyone..!`
             },
             {
                 speaker: "Grog",
-                text: "Shut up, Jerry! You did nothing to help us!"
+                text: `Shut up, jerry! You did nothing to help us!`
             },
         ]
     },
-    
     {
-        type: "dice",
-        text: "The door looks fragile. Try to break it?",
-        rollText: "Strength Check",
-
-        success: {
-            threshold: 12,
-            nextStep: 2
-        },
-
-        fail: {
-            nextStep: 2
-        }
+        type: "text",
+        text: `The party and jerry gather themselves and moves onward. They could tell there is something bad waiting for them in the next department.`
     },
-    // choice roll with advantage example
     {
-        type: "dice",
-        text: "Try to convince the guard to let you pass.",
-        rollText: "Persuasion Attempt",
-
-        success: {
-            threshold: 12,
-            nextStep: 3,
-            message: "The party successfully convinced the guards."
-        },
-
-        fail: {
-            nextStep: 3,
-            message: "The guards remain unconvinced."
-        },
-
-        advantage: true,
-        advantageText: "Try again with a better argument?"
-    },
-
-    // branching choice based on location
-    {
-        type: "choice",
-        text: "Where do you go next?",
-        options: [
-            {
-                label: "Clothing Department",
-                log: "The party headed to the clothing department.",
-                nextStep: 0,
-                setLocation: "clothing",
-                nextChapter: 3,
-                effect: (state) => {
-                    state.flags.wentToClothing = true;
-                }
-            },
-            {
-                label: "Hardware Department",
-                log: "The party headed to the hardware department.",
-                nextStep: 0,
-                setLocation: "hardware",
-                nextChapter: 3,
-                effect: (state) => {
-                    state.flags.wentToHardware = true;
-                }
-            }
-        ]
+        type: "nextChapter",
+        text: `The party sees a sign that says "Toys Department", and steps forward...`,
+        nextChapter: 3,
+        buttonText: "Enter Toys Department"
     }
 ];
 

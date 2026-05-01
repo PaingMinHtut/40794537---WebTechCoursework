@@ -2,8 +2,11 @@ import { getSaveList, loadGame, deleteSave } from "../engine/saveSystem.js";
 import { gameState } from "../engine/state.js";
 import { loadChapter, startStory } from "../engine/renderer.js";
 import { chapter1 } from "../story/chapter1.js";
+import { chapter2 } from "../story/chapter2.js";
+import { chapter3 } from "../story/chapter3.js";
+import { chapter4 } from "../story/chapter4.js";
 
-// 🕒 Time formatter
+// Time formatter
 function formatTime(timestamp) {
     if (!timestamp) return "Unknown";
 
@@ -21,7 +24,7 @@ function formatTime(timestamp) {
 export function showSaves() {
     const app = document.getElementById("app");
 
-    // ✅ Sort newest first
+    // Sort newest first
     const saves = getSaveList().sort((a, b) => b.lastPlayed - a.lastPlayed);
 
     if (saves.length === 0) {
@@ -79,12 +82,21 @@ export function showSaves() {
             if (gameState.chapter === 1) {
                 loadChapter(chapter1);
             }
+            else if (gameState.chapter === 2) {
+                loadChapter(chapter2);
+            }
+            else if (gameState.chapter === 3) {
+                loadChapter(chapter3);
+            }
+            else if (gameState.chapter === 4) {
+                loadChapter(chapter4);
+            }
 
             startStory();
         };
     });
 
-    // Confirm delete (NEW)
+    // Confirm delete
     document.querySelectorAll(".delete-btn").forEach(btn => {
         btn.onclick = () => {
             const confirmed = confirm("Are you sure you want to delete this save?");

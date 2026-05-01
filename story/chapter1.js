@@ -10,7 +10,7 @@ const storySteps = [
     },
     {
         type: "text",
-        text: `There's Grog Stonemason, a hulking, self-proclaimed "beefcake" of a half-orc barbarian. Grog never knew his parents. It was just him and his brother against the world, until one day, they were separated and never saw one another again. He wields a greataxe that is the size of an average gnome, and boy, he is not afraid to use it. It's a miracle the axe is still intact after an ungodly amount of violence Grog has committed with it.`
+        text: `There's Grog Stonemason, a hulking, self-proclaimed "beefcake" of a half-orc barbarian. Grog never knew his parents. It was just him and his sister against the world, until one day, they were separated and never saw one another again. He wields a greataxe that is the size of an average gnome, and boy, he is not afraid to use it. It's a miracle the axe is still intact after an ungodly amount of violence Grog has committed with it.`
     },
     {
         type: "text",
@@ -34,7 +34,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Guard 1",
+        speaker: "guard_1",
         text: `Hold it right there! State your name and business in Waltown.`
     },
     {
@@ -80,11 +80,11 @@ const storySteps = [
             case "noName":
                 return [
                     {
-                        speaker: "Guard 1",
+                        speaker: "guard_1",
                         text: `Oh. A bunch of nameless nobodies, eh?`
                     },
                     {
-                        speaker: "Guard 2",
+                        speaker: "guard_2",
                         text: `I guess we'll call you... The Solos.` // A jab at that one scene from the Han Solo movie
                     }
                 ];
@@ -92,11 +92,11 @@ const storySteps = [
             case "mightyNein":
                 return [
                     {
-                        speaker: "Guard 1",
+                        speaker: "guard_1",
                         text: `N-Nine? But there's only three of you.` // Not everyone understand German or "Zemnian", Caleb!
                     },
                     {
-                        speaker: "Guard 2",
+                        speaker: "guard_2",
                         text: `Ugh. Whatever. The mayor probably has some sort of fetch quest for you. Just don't cause any trouble!`
                     }
                 ];
@@ -104,11 +104,11 @@ const storySteps = [
             case "voxMachina":
                 return [
                     {   
-                        speaker: "Guard 1",
+                        speaker: "guard_1",
                         text: `Hey, isn't that the group that overthrew the Briarwoods and saved Whitestone? Are you sure you guys are the real deal?`
                     },
                     {
-                        speaker: "Guard 2",
+                        speaker: "guard_2",
                         text: `Ugh. Whatever. The mayor probably has some sort of fetch quest for you. Just don't cause any trouble!`
                     }
                 ];
@@ -116,11 +116,11 @@ const storySteps = [
             case "lotr":
                 return [
                     {   
-                        speaker: "Guard 1",
+                        speaker: "guard_1",
                         text: `Why didn't you guys take the eagles to Mordor?` // Yes, I am aware that flying to Mordor is not a good idea, but it just felt too perfect not to include.
                     },
                     {    
-                        speaker: "Guard 2",
+                        speaker: "guard_2",
                         text: `Ugh. Whatever. The mayor probably has some sort of fetch quest for you. Just don't cause any trouble!`
                     }
                 ];
@@ -128,11 +128,11 @@ const storySteps = [
             case "dungeonMeshi":
                 return [
                     {   
-                        speaker: "Guard 1",
+                        speaker: "guard_1",
                         text: `Ew... You're not a part of those weirdos that eat monsters, are you?`
                     },
                     {    
-                        speaker: "Guard 2",
+                        speaker: "guard_2",
                         text: `Ugh. Whatever. The mayor probably has some sort of fetch quest for you. Just don't cause any trouble!`
                     }
                 ];
@@ -140,11 +140,11 @@ const storySteps = [
             default:
                 return [
                     {
-                        speaker: "Guard 1",
+                        speaker: "guard_1",
                         text: `Oh, great. Yet another one of those high-and-mighty adventurers that won't surely cause trouble. We've got enough problems already.`
                     },
                     {
-                        speaker: "Guard 2",
+                        speaker: "guard_2",
                         text: `But, I suppose we'd have to let you in anyway. The mayor surely has some fetch quest for you or something.`
                     }
                 ];
@@ -184,7 +184,7 @@ const storySteps = [
                 text: `Yeah, Grog. Let's go to the tavern first.`
             },
             {
-                speaker: "Reyllynn",
+                speaker: "Rellynn",
                 text: `Are you two even listening to me? We have no money for a drink!`
             }
         ]
@@ -195,7 +195,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Jerry",
+        speaker: "jerry",
         text: `O-oh, h-hello there, travelers! I am Jerry, the mayor of Waltown.`
     },
     {
@@ -206,7 +206,7 @@ const storySteps = [
                 text: `Wait. You're the mayor? Why are you bussing tables then?`
             },
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `O-oh, well, Waltown has a very small population. Y-you might have noticed that there aren't many people around. But it wasn't always this way...`
             }
         ]
@@ -219,11 +219,11 @@ const storySteps = [
                 text: `Yeah, we noticed. What happened to the town?`
             },
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `W-well, Waltown used to be a bustling town, with a thriving economy and a large population, t-thanks to the strange, otherworldly store that appeared out of nowhere. T-the owner of that store called it... Walmart.`
             },
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `B-but it became so popular. We could get high-quality goods from all over the world, even ones that we have never seen before. That led to our economy booming, and our population growing rapidly. W-we even named our town after the store.`
         
             },
@@ -235,16 +235,16 @@ const storySteps = [
         options: [
             {
                 label: "Ask for some orange juice",
-                log: "The party rudely interrupted Jerry and asked for some orange juice.",
-                nextStep: 21, // starts from the next dialogue step where Jerry goes to get the orange juice
+                log: "The party rudely interrupted jerry and asked for some orange juice.",
+                nextStep: 21, // starts from the next dialogue step where jerry goes to get the orange juice
                 effect: (state) => {
                     state.flags.askedForOJ = true;
                 }
             },
             {
                 label: "Continue listening",
-                log: "The party continued lisetening to Jerry's story.",
-                nextStep: 24 // starts from the next dialogue step where Jerry continues his story without interruption
+                log: "The party continued lisetening to jerry's story.",
+                nextStep: 24 // starts from the next dialogue step where jerry continues his story without interruption
             }
         ]
     },
@@ -258,14 +258,14 @@ const storySteps = [
                 text: `Can we get some orange juice or something? I'm parched.`
             },
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `O-oh, u-um, s-sure. I have some in the back. I-I'll go get it for you.`
             }
         ]
     },
     {
         type: "text",
-        text: `Jerry awkwardly stumbles into the back of the tavern. A few minutes later, he returns with a pitcher of orange juice. He pours the orange juice into three mugs and serves them to the party.`
+        text: `jerry awkwardly stumbles into the back of the tavern. A few minutes later, he returns with a pitcher of orange juice. He pours the orange juice into three mugs and serves them to the party.`
     },
     {
         type: "dialogue",
@@ -282,7 +282,7 @@ const storySteps = [
     },
     {
         type: "dialogue",
-        speaker: "Jerry",
+        speaker: "jerry",
         text: (state) => {
             if (state.flags.askedForOJ) {
                 return `S-so, as I was saying before, the problem was that... monsters started appearing around the town. All of them looked like the goods from Walmart. This drove everyone away, and there are only a few of us left.`;
@@ -308,11 +308,11 @@ const storySteps = [
         type: "dialogue",
         lines: [
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `W-well, we tried that. But the monsters were too strong. They were like nothing we've ever seen before. We couldn't hurt them with our weapons, and they could easily tear us apart.`
             },
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `A-and we can't fight them now! There are only two guards left in this town. W-we are just a bunch of defenseless villagers now! Oh, please, adventurers, you must help us!`
             }
         ]
@@ -322,10 +322,10 @@ const storySteps = [
         lines: [
             {
                 speaker: "Leo",
-                text: `Don't worry, Jerry. We'll take care of those monsters for you.`
+                text: `Don't worry, jerry. We'll take care of those monsters for you.`
             },
             {
-                speaker: "Jerry",
+                speaker: "jerry",
                 text: `Oh, thank you so much! Please, go to the store and take care of-`
             },
             {
@@ -336,11 +336,11 @@ const storySteps = [
     },
     {
         type: "text",
-        text: `Jerry hesitates mid-sentence, and looks at Leo for a moment, then nods reluctantly.`
+        text: `jerry hesitates mid-sentence, and looks at Leo for a moment, then nods reluctantly.`
     },
     {
         type: "dialogue",
-        speaker: "Jerry",
+        speaker: "jerry",
         text: `O-okay. I-I'll pay you 100 gold coins if you can take care of the monsters. A-and, I'm coming with you.`
     },
     {
@@ -371,7 +371,7 @@ const storySteps = [
     },
     {
         type: "text",
-        text: `The party, along with Jerry, head to the Walmart store on the outskirts of town. As they approach the store, the party sees that it's unlike anything they've ever seen before. It's a massive, multi-story building that seems to stretch on forever.`
+        text: `The party, along with jerry, head to the Walmart store on the outskirts of town. As they approach the store, the party sees that it's unlike anything they've ever seen before. It's a massive, multi-story building that seems to stretch on forever.`
     },
     {
         type: "text",

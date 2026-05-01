@@ -15,7 +15,7 @@ export function rollChoice({ modifier = 0 } = {}) {
     };
 }
 
-// Attack roll not used yet
+// Attack roll
 export function rollAttack({
     attackBonus = 0,
     targetAC = 10
@@ -63,7 +63,7 @@ export function openDiceModal({ text = "Roll the dice!", rollFn, onResult }) {
 
         let rolls = 0;
 
-        // 🎲 Rolling animation
+        // Rolling animation
         const interval = setInterval(() => {
             display.innerText = Math.floor(Math.random() * 20) + 1;
             rolls++;
@@ -72,7 +72,7 @@ export function openDiceModal({ text = "Roll the dice!", rollFn, onResult }) {
         setTimeout(() => {
             clearInterval(interval);
 
-            // ✅ Use provided roll function OR fallback to choice roll
+            // Use provided roll function OR fallback to choice roll
             const roll = rollFn ? rollFn() : rollChoice();
 
             display.innerText = roll.total;
@@ -80,7 +80,7 @@ export function openDiceModal({ text = "Roll the dice!", rollFn, onResult }) {
             // Reset classes
             display.classList.remove("crit-success", "crit-fail");
 
-            // ✅ Handle BOTH systems (choice + attack)
+            // Handle BOTH systems (choice + attack)
             if (roll.isCrit || roll.isCritSuccess) {
                 display.classList.add("crit-success");
             } else if (roll.isMiss || roll.isCritFail) {

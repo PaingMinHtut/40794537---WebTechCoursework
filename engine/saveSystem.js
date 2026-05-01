@@ -1,3 +1,5 @@
+import { gameState } from "./state.js";
+
 function generateId() {
     return "save-" + crypto.randomUUID();
 }
