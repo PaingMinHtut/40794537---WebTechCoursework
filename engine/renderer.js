@@ -48,21 +48,21 @@ function renderStep() {
     }
 
     if (step.type === "dialogue") {
-    const lines = typeof step.lines === "function"
-        ? step.lines(gameState)
-        : step.lines;
+        const lines = typeof step.lines === "function"
+            ? step.lines(gameState)
+            : step.lines;
 
-    // Supports both single dialogue and multiple lines of dialogue
-    if (lines) {
-        lines.forEach(line => {
-            appendDialogue(line.speaker, resolveText(line.text));
-        });
-    } else {
-        appendDialogue(step.speaker, resolveText(step.text));
+        // Supports both single dialogue and multiple lines of dialogue
+        if (lines) {
+            lines.forEach(line => {
+                appendDialogue(line.speaker, resolveText(line.text));
+            });
+        } else {
+            appendDialogue(step.speaker, resolveText(step.text));
+        }
+
+        controls.innerHTML = `<button onclick="nextStep()">Continue</button>`;
     }
-
-    controls.innerHTML = `<button onclick="nextStep()">Continue</button>`;
-}
 
     if (step.type === "input") {
         appendText(step.text);

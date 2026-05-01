@@ -153,7 +153,7 @@ const storySteps = [
     },
     {
         type: "text",
-        text: `The guards step aside and let the party into Waltown.`
+        text: `The guards step aside and let the party into Waltown. The town is eerily quiet, with only a few townsfolk milling about. The buildings are old and run-down, and the streets are empty. The party can't help but feel a sense of unease as they step into the town.`
     },
     {
         type: "dialogue",
@@ -191,34 +191,199 @@ const storySteps = [
     },
     {
         type: "text",
-        text: `Despite Rellynn's protests, the two man-children drag her along and head to the nearest tavern anyway. The interiors of the taven are dimly lit, the air thick with the smell of ale and sweat. It was also quite deserted, as there was no one else but the bartender behind the counter. The bartender looks up as they enter, and greets them with an innocent look on his face.`
+        text: `Despite Rellynn's protests, the two man-children drag her along and head to the nearest tavern anyway. The interiors of the taven are dimly lit, the air thick with the smell of ale. It was also quite deserted, as there was no one else but a meek-looking tavern keeper behind the counter. The tavern keeper looks up as they enter, and greets them with an awkward, nervous look on his face.`
     },
-
-    // you are currently here (the rest of the story hasn't been written or "fine-tuned" yet)
-
-    // choice example:
+    {
+        type: "dialogue",
+        speaker: "Jerry",
+        text: `O-oh, h-hello there, travelers! I am Jerry, the mayor of Waltown.`
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Rellynn",
+                text: `Wait. You're the mayor? Why are you bussing tables then?`
+            },
+            {
+                speaker: "Jerry",
+                text: `O-oh, well, Waltown has a very small population. Y-you might have noticed that there aren't many people around. But it wasn't always this way...`
+            }
+        ]
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Leo",
+                text: `Yeah, we noticed. What happened to the town?`
+            },
+            {
+                speaker: "Jerry",
+                text: `W-well, Waltown used to be a bustling town, with a thriving economy and a large population, t-thanks to the strange, otherworldly store that appeared out of nowhere. T-the owner of that store called it... Walmart.`
+            },
+            {
+                speaker: "Jerry",
+                text: `B-but it became so popular. We could get high-quality goods from all over the world, even ones that we have never seen before. That led to our economy booming, and our population growing rapidly. W-we even named our town after the store.`
+        
+            },
+        ]
+    },
     {
         type: "choice",
-        text: "What do you do?",
+        text: "Grog is really thirsty, and can't stop thinking about how good some orange juice would taste right now. What will you do?",
         options: [
             {
-                label: "Ask for orange juice",
-                log: "The party asked for some orange juice.",
-                nextStep: 18,
+                label: "Ask for some orange juice",
+                log: "The party rudely interrupted Jerry and asked for some orange juice.",
+                nextStep: 21, // starts from the next dialogue step where Jerry goes to get the orange juice
                 effect: (state) => {
                     state.flags.askedForOJ = true;
                 }
             },
             {
-                label: "Stay silent",
-                nextStep: 18 //placeholder
+                label: "Continue listening",
+                log: "The party continued lisetening to Jerry's story.",
+                nextStep: 24 // starts from the next dialogue step where Jerry continues his story without interruption
             }
         ]
     },
-    // next chapter example:
+
+    // orange juice interruption starts here
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Grog",
+                text: `Can we get some orange juice or something? I'm parched.`
+            },
+            {
+                speaker: "Jerry",
+                text: `O-oh, u-um, s-sure. I have some in the back. I-I'll go get it for you.`
+            }
+        ]
+    },
+    {
+        type: "text",
+        text: `Jerry awkwardly stumbles into the back of the tavern. A few minutes later, he returns with a pitcher of orange juice. He pours the orange juice into three mugs and serves them to the party.`
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Grog",
+                text: `Heh! Now that's more like it!`   
+            },
+            {
+                speaker: "Rellynn",
+                text: `Really, Grog?`
+            },
+        ]
+    },
+    {
+        type: "dialogue",
+        speaker: "Jerry",
+        text: (state) => {
+            if (state.flags.askedForOJ) {
+                return `S-so, as I was saying before, the problem was that... monsters started appearing around the town. All of them looked like the goods from Walmart. This drove everyone away, and there are only a few of us left.`;
+            } else {
+                return `W-well, t-t-the problem was that... monsters started appearing around the town. All of them looked like the goods from Walmart. This drove everyone away, and there are only a few of us left.`;
+            }
+        },
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Grog",
+                text: `Why don't you guys just fight back?`
+            },
+            {
+                speaker: "Rellynn",
+                text: `(bumps Grog with her elbow while whispering) Grog!`
+            }
+        ]
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Jerry",
+                text: `W-well, we tried that. But the monsters were too strong. They were like nothing we've ever seen before. We couldn't hurt them with our weapons, and they could easily tear us apart.`
+            },
+            {
+                speaker: "Jerry",
+                text: `A-and we can't fight them now! There are only two guards left in this town. W-we are just a bunch of defenseless villagers now! Oh, please, adventurers, you must help us!`
+            }
+        ]
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Leo",
+                text: `Don't worry, Jerry. We'll take care of those monsters for you.`
+            },
+            {
+                speaker: "Jerry",
+                text: `Oh, thank you so much! Please, go to the store and take care of-`
+            },
+            {
+                speaker: "Leo",
+                text: `For a price, of course.`
+            }
+        ]
+    },
+    {
+        type: "text",
+        text: `Jerry hesitates mid-sentence, and looks at Leo for a moment, then nods reluctantly.`
+    },
+    {
+        type: "dialogue",
+        speaker: "Jerry",
+        text: `O-okay. I-I'll pay you 100 gold coins if you can take care of the monsters. A-and, I'm coming with you.`
+    },
+    {
+        type: "dialogue",
+        lines: [
+            {
+                speaker: "Grog",
+                text: `Why does he have to come with us?`
+            },
+            {
+                speaker: "Rellynn",
+                text: `So he can show us the way, Grog. Urgh!`
+            },
+            {
+                speaker: "Leo",
+                text: `Yep. The more the merrier, right?`
+            },
+            {
+                speaker: "Grog",
+                text: `But this guy's so lame! Ugh, fine... But if something happens to us, I'm blaming him!`
+            },
+        ]
+    },
+    {
+        type: "dialogue",
+        speaker: "Leo",
+        text: `Alas! Time for another adventure!`
+    },
+    {
+        type: "text",
+        text: `The party, along with Jerry, head to the Walmart store on the outskirts of town. As they approach the store, the party sees that it's unlike anything they've ever seen before. It's a massive, multi-story building that seems to stretch on forever.`
+    },
+    {
+        type: "text",
+        text: `The walls are too smooth—unnaturally so—like polished stone without a single crack or seam. The surface gleams faintly, reflecting light in a way that feels… wrong. No torchlight flickers against it, yet everything is clearly visible.`
+    },
+    {
+        type: "text",
+        text: `Above the entrance, glowing symbols hang in the air, bright as magefire but steady, cold, and without warmth. The doors themselves slide open on their own as the party nears, parting with a soft hiss like a creature breathing.`
+    },
     {
         type: "nextChapter",
-        text: "The party steps into Walmart... something feels wrong.",
+        text: "The party steps into Walmart...",
         nextChapter: 2,
         buttonText: "Enter Walmart"
     }

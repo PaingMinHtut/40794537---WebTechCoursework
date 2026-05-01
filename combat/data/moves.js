@@ -13,6 +13,8 @@ export const moves = {
         requiresRoll: true,
         threshold: 13,
 
+        description: "Grog swings the greataxe at the enemy. Requires 13 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.",
+
         getDamage: (roll) => roll.isCrit ? 2 : 1
     },
 
@@ -22,6 +24,8 @@ export const moves = {
         target: "enemy",
         requiresRoll: true,
         threshold: 5,
+
+        description: "Grog attacks recklessly; deals more damage easily, but he is more vulnerable on the next turn. Requires 5 or above to hit. Deals 2 damage. Deals 3 damage on nat20s.",
 
         getDamage: (roll) => roll.isCrit ? 3 : 2,
 
@@ -40,16 +44,16 @@ export const moves = {
         target: "self",
         requiresRoll: false,
 
+        description: "Grog roars; attracting all of the enemy's attention onto him for the next 2 turns. This move always hits, and does not end Grog's turn. Goes on a cooldown for 2 turns.",
+
         cooldown: 2,
-        currentCooldown: 0,
-        startLocked: false,
 
         endsTurn: false,
 
         onUse: (user) => {
             applyStatus(user, {
                 type: STATUS.TAUNT,
-                duration: 1
+                duration: 2
             });
         }
     },
@@ -60,16 +64,13 @@ export const moves = {
         target: "self",
         requiresRoll: false,
 
+        description: "Grog rages; his attacks are much stronger for the next 3 turns. This move always hits. Goes on a cooldown for 4 turns.",
         cooldown: 4,
-        currentCooldown: 4,
-        startLocked: true,
-
-        endsTurn: false,
 
         onUse: (user) => {
             applyStatus(user, {
                 type: STATUS.RAGE,
-                duration: 2
+                duration: 3
             });
         }
     },
@@ -83,8 +84,10 @@ export const moves = {
         type: "attack",
         target: "enemy",
         requiresRoll: true,
-        threshold: 15,
+        threshold: 13,
 
+        description: "Leo viciously mocks the enemy, making them depressed if successful. Depressed enemies are unable to move on the next turn. Requires 13 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.",
+        
         getDamage: (roll) => roll.isCrit ? 2 : 1,
 
         onHit: (user, target) => {
@@ -101,8 +104,10 @@ export const moves = {
         target: "ally",
         requiresRoll: false,
 
+        description: "Leo heals an ally for 2 HP. This move always hits.",
+
         onUse: (user, target) => {
-            target.currentHp = Math.min(target.maxHp, target.currentHp + 1);
+            target.currentHp = Math.min(target.maxHp, target.currentHp + 2);
         }
     },
 
@@ -112,9 +117,9 @@ export const moves = {
         target: "party",
         requiresRoll: false,
 
+        description: "Leo lets out a song; inspiring the party for the next 2 turns. Inspired allies' moves are more likely to hit. This move always hits. Goes on a cooldown for 2 turns.",
+
         cooldown: 2,
-        currentCooldown: 0,
-        startLocked: false
     },
 
     hypnotic: {
@@ -122,11 +127,11 @@ export const moves = {
         type: "attack",
         target: "enemy",
         requiresRoll: true,
-        threshold: 17,
+        threshold: 15,
+
+        description: "Leo hypnotizes the enemy. Hypnotized enemies are unable to move for the next 2 turns. Requires 15 or above to hit. Goes on a cooldown for 4 turns.",
 
         cooldown: 4,
-        currentCooldown: 4,
-        startLocked: true,
 
         onHit: (user, target) => {
             applyStatus(target, {
@@ -145,7 +150,9 @@ export const moves = {
         type: "attack",
         target: "enemy",
         requiresRoll: true,
-        threshold: 13,
+        threshold: 10,
+
+        description: "Rellynn shoots a fireball and burns the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nBurning enemies take 1 damage on each of the next 2 turns.\nCauses the MELT effect if the burning enemy is met with ice, and deals 3 damage.\nCauses the OVERLOAD effect if the burning enemy is met with lightning, and deals 3 damage.",
 
         element: STATUS.BURN,
 
@@ -157,7 +164,9 @@ export const moves = {
         type: "attack",
         target: "enemy",
         requiresRoll: true,
-        threshold: 13,
+        threshold: 10,
+
+        description: "Rellynn shoots a ice beam and freezes the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nFrozen enemies take 1 damage on each of the next 2 turns.\nCauses the MELT effect if the frozen enemy is met with fire, and deals 3 damage.\nCauses the SUPERCONDUCT effect if the frozen enemy is met with lightning, and deals 3 damage.",
 
         element: STATUS.FROST,
 
@@ -169,7 +178,9 @@ export const moves = {
         type: "attack",
         target: "enemy",
         requiresRoll: true,
-        threshold: 13,
+        threshold: 10,
+
+        description: "Rellynn shoots a lighting bolt and shocks the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nShocked enemies take 1 damage on each of the next 2 turns.\nCauses the OVERLOAD effect if the shocked enemy is met with fire, and deals 3 damage.\nCauses the SUPERCONDUCT effect if the shocked enemy is met with ice, and deals 3 damage.",
 
         element: STATUS.SHOCK,
 
@@ -182,10 +193,10 @@ export const moves = {
         target: "enemy",
         requiresRoll: false,
 
-        cooldown: 4,
-        currentCooldown: 4,
-        startLocked: true,
+        description: "Rellynn fires five magic missiles at the enemy, dealing 5 damage. This move always hits. Goes on a cooldown for 4 turns.",
 
-        getDamage: (roll) => (roll && roll.isCrit) ? 7 : 5
+        cooldown: 4,
+
+        getDamage: (roll) => 5
     }
 };

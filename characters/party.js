@@ -2,8 +2,8 @@ export const party = {
     grog: {
         id: "grog",
         name: "Grog",
-        portrait: "../assets/portraits/grog.png",
-        hp: 5,
+        portrait: "grog.png",
+        hp: 7,
         maxHp: 5,
         ac: 15,
         initiative: 3,
@@ -15,8 +15,8 @@ export const party = {
     leo: {
         id: "leo",
         name: "Leo",
-        portrait: "../assets/portraits/leo.png",
-        hp: 4,
+        portrait: "leo.png",
+        hp: 5,
         maxHp: 4,
         ac: 10,
         initiative: 6,
@@ -28,11 +28,11 @@ export const party = {
     rellynn: {
         id: "rellynn",
         name: "Rellynn",
-        portrait: "../assets/portraits/rellynn.png",
-        hp: 3,
+        portrait: "rellynn.png",
+        hp: 4,
         maxHp: 3,
         ac: 8,
-        initiative: 9,
+        initiative: 8,
         attackBonus: 0,
         statuses: [],
         moves: ["fireball", "frost", "lightning", "missiles"]

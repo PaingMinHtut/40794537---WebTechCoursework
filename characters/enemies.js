@@ -1,3 +1,5 @@
+import { applyStatus, STATUS } from "../combat/data/statuses.js";
+
 export const enemies = {
 
     // =====================================
@@ -6,7 +8,8 @@ export const enemies = {
     cola: {
         id: "cola",
         name: "Can o' Coca Cola",
-        hp: 4,
+        portrait: "cola.png",
+        hp: 3,
         initiative: 3,
         type: "basic"
     },
@@ -14,14 +17,16 @@ export const enemies = {
     doritos: {
         id: "doritos",
         name: "Doritos Bag",
+        portrait: "doritos.png",
         hp: 2,
-        initiative: 7,
+        initiative: 9,
         type: "basic"
     },
 
     oreo: {
         id: "oreo",
         name: "Oreo Cookie",
+        portrait: "oreo.png",
         hp: 3,
         initiative: 5,
         type: "basic"
@@ -30,7 +35,8 @@ export const enemies = {
     hot_pocket: {
         id: "hot_pocket",
         name: "Lava Hot Pocket",
-        hp: 6,
+        portrait: "hot pocket.png",
+        hp: 5,
         initiative: 5,
         type: "elite",
 

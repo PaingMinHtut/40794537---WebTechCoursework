@@ -81,24 +81,47 @@ export function processStatuses(unit, log) {
 // ELEMENTAL REACTION
 // =======================
 
-export function tryElementalReaction(target, newElement) {
+export function tryElementalReaction(target, newElement, log) {
+
     const existing = target.statuses.find(s =>
-        [STATUS.BURN, STATUS.FROST, STATUS.SHOCK].includes(s.type)
+        s.type === STATUS.BURN ||
+        s.type === STATUS.FROST ||
+        s.type === STATUS.SHOCK
     );
 
-    if (!existing) return null;
-
-    const key = [existing.type, newElement].sort().join("_");
-
-    if (REACTIONS[key]) {
-        // remove existing element
-        target.statuses = target.statuses.filter(s => s !== existing);
-
-        return {
-            type: REACTIONS[key],
-            bonusDamage: 3
-        };
+    if (!existing) {
+        applyStatus(target, { type: newElement, duration: 2 });
+        return;
     }
 
-    return null;
+    const combo = [existing.type, newElement].sort().join("-");
+
+    let reaction = null;
+
+    if (combo === [STATUS.BURN, STATUS.SHOCK].sort().join("-")) {
+        reaction = "Overload";
+    }
+
+    if (combo === [STATUS.BURN, STATUS.FROST].sort().join("-")) {
+        reaction = "Melt";
+    }
+
+    if (combo === [STATUS.FROST, STATUS.SHOCK].sort().join("-")) {
+        reaction = "Superconduct";
+    }
+
+    if (reaction) {
+        target.currentHp -= 3;
+        log(`${reaction}! 3 bonus damage!`);
+
+        // remove both statuses
+        target.statuses = target.statuses.filter(s =>
+            s.type !== existing.type
+        );
+
+        return;
+    }
+
+    // otherwise replace
+    applyStatus(target, { type: newElement, duration: 2 });
 }

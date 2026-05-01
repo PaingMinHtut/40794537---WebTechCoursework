@@ -11,11 +11,28 @@ import {
 } from "./data/statuses.js";
 import { openDiceModal } from "../engine/dice.js";
 import { gameState } from "../engine/state.js";
+import { saveGame, loadGame } from "../engine/saveSystem.js";
+import { render } from "../app.js";
+
+const STATUS_ICONS = {
+    burn: "🔥",
+    frost: "❄️",
+    shock: "⚡",
+
+    rage: "💢",
+    reckless: "⚠️",
+    taunt: "🎯",
+
+    depressed: "😞",
+    hypnotized: "🌀",
+    inspiration: "✨"
+};
 
 let combatState = {
     units: [],
     turnOrder: [],
-    turnIndex: 0
+    turnIndex: 0,
+    isActive: false
 };
 
 // Initialize combat
@@ -25,6 +42,7 @@ function initCombat(encounterId) {
         ...structuredClone(p),
         team: "player",
         currentHp: p.hp,
+        maxHp: p.hp,
         statuses: []
     }));
 
@@ -42,6 +60,7 @@ function initCombat(encounterId) {
             ...e,
             team: "enemy",
             currentHp: e.hp,
+            maxHp: e.hp,
             statuses: []
         };
     });
@@ -58,9 +77,7 @@ function initCombat(encounterId) {
 
             return {
                 ...baseMove,
-                currentCooldown: baseMove.startLocked
-                    ? baseMove.cooldown
-                    : 0
+                currentCooldown: 0
             };
         });
     });
@@ -70,6 +87,7 @@ function initCombat(encounterId) {
     );
 
     combatState.turnIndex = 0;
+    combatState.isActive = true;
 }
 
 export function showCombat() {
@@ -115,13 +133,21 @@ function renderTurnBar() {
 
     combatState.turnOrder.forEach((unit, i) => {
         const el = document.createElement("div");
-        el.className = "unit";
+        el.className = "turn-unit";
 
         if (i === combatState.turnIndex) {
-            el.style.border = "2px solid yellow";
+            el.classList.add("active-turn");
         }
 
-        el.innerText = unit.name[0];
+        if (unit.currentHp <= 0) {
+            el.classList.add("dead-unit");
+        }
+
+        const img = document.createElement("img");
+        img.src = `assets/portraits/${unit.portrait}`;
+        img.className = "turn-portrait";
+
+        el.appendChild(img);
         bar.appendChild(el);
     });
 }
@@ -139,16 +165,40 @@ function renderUnits() {
         el.className = "unit";
         el.dataset.id = unit.id;
 
+        // 🖼 Portrait
         const img = document.createElement("img");
         img.src = `assets/portraits/${unit.portrait}`;
         img.className = "portrait-img";
 
-        const hp = document.createElement("div");
-        hp.className = "hp-text";
-        hp.innerText = `${unit.currentHp}/${unit.maxHp}`;
+        // ❤️ HP text
+        const hpBar = document.createElement("div");
+        hpBar.className = "hp-bar";
 
+        const hpFill = document.createElement("div");
+        hpFill.className = "hp-fill";
+
+        const percent = (unit.currentHp / unit.maxHp) * 100;
+        hpFill.style.width = percent + "%";
+
+        hpBar.appendChild(hpFill);
+        el.appendChild(hpBar);
+
+        // ✨ STATUS ICONS
+        const statusBar = document.createElement("div");
+        statusBar.className = "status-bar";
+
+        unit.statuses.forEach(status => {
+            const icon = document.createElement("span");
+
+            const key = status.type.toLowerCase();
+            icon.innerText = STATUS_ICONS[key] || "❔";
+
+            statusBar.appendChild(icon);
+        });
+
+        el.appendChild(statusBar);
         el.appendChild(img);
-        el.appendChild(hp);
+        el.appendChild(hpBar, hpFill, percent);
 
         if (unit.team === "player") {
             partyArea.appendChild(el);
@@ -161,13 +211,18 @@ function renderUnits() {
 function startTurn() {
     const unit = combatState.turnOrder[combatState.turnIndex];
 
-    // 💀 Skip dead allies
-    if (unit.team === "player" && unit.currentHp <= 0) {
-        nextTurn();
-        return;
+    console.log("TURN:", unit.name, unit.team);
+
+    // ❗ APPLY COOLDOWN REDUCTION HERE
+    if (unit.moves) {
+        reduceCooldowns(unit);
     }
 
-    reduceCooldowns(unit); // ✅ NEW
+    // 💀 DEAD PLAYER → skip but KEEP in turn order
+    if (unit.team === "player" && unit.currentHp <= 0) {
+        setTimeout(nextTurn, 600);
+        return;
+    }
 
     const { skipTurn } = processStatuses(unit, log);
 
@@ -178,6 +233,9 @@ function startTurn() {
         return;
     }
 
+    // Always clear UI first
+    clearActionUI();
+
     if (unit.team === "enemy") {
         runEnemyTurn(unit);
     } else {
@@ -187,6 +245,10 @@ function startTurn() {
 
 function renderCharacterPanel(unit) {
     document.getElementById("charName").innerText = unit.name;
+    
+    document.querySelectorAll(".unit").forEach(el => {
+        el.style.pointerEvents = "auto";
+    });
 
     const hpPercent = (unit.currentHp / unit.maxHp) * 100;
     document.getElementById("healthFill").style.width = hpPercent + "%";
@@ -238,7 +300,7 @@ function selectTarget(user, move) {
         const el = document.querySelector(`[data-id="${target.id}"]`);
 
         el.style.outline = "2px solid yellow";
-
+        el.style.pointerEvents = "auto";
         el.onclick = () => {
             clearTargetSelection();
             executeMove(user, target, move);
@@ -248,22 +310,25 @@ function selectTarget(user, move) {
 
 function executeMove(user, target, move) {
 
-    // 🎲 IF ROLL REQUIRED
     if (move.requiresRoll) {
 
         openDiceModal({
             text: `${user.name} uses ${move.name}!`,
             rollFn: () => rollAttack({
                 attackBonus: getAttackBonus(user),
-                targetAC: target.ac
+                targetAC: 0
             }),
             onResult: (roll) => {
 
                 log(`${user.name} rolled ${roll.total}`);
 
-                if (!roll.hit) {
+                // USE THRESHOLD INSTEAD OF roll.hit
+                if (roll.base === 1 || roll.total < move.threshold) {
                     log("Miss!");
-                    if (move.endsTurn !== false) nextTurn();
+                    if (move.endsTurn !== false) {
+                        clearActionUI();
+                        nextTurn();
+                    }
                     return;
                 }
 
@@ -276,7 +341,7 @@ function executeMove(user, target, move) {
         return;
     }
 
-    // ⚡ NO ROLL (like Magic Missiles, Rage, Roar)
+    // No roll (for moves that don't require rolls)
     applyMove(user, target, move, null);
 }
 
@@ -288,39 +353,30 @@ function handleMove(user, move) {
             .filter(u => u.team === "player")
             .forEach(u => {
                 applyStatus(u, {
-                    type: "inspiration",
+                    type: STATUS.INSPIRATION,
                     duration: 2,
                     value: 3
                 });
             });
 
-        log("Party gains Bardic Inspiration!");
-        nextTurn();
+        applyMove(user, null, move, null);
         return;
     }
 
     // 🟢 SELF
     if (move.target === "self") {
-
-        if (move.name === "Unbridled Rage") {
-            applyStatus(user, { type: "rage", duration: 2 });
-        }
-
-        if (move.name === "Beckoning Roar") {
-            applyStatus(user, { type: "taunt", duration: 1 });
-            log("Enemies are forced to target Grog!");
-            return;
-        }
-
-        nextTurn();
+        applyMove(user, user, move, null);
         return;
     }
 
-    // ⚔️ TARGET REQUIRED
+    // ⚔️ TARGET
     selectTarget(user, move);
 }
 
 function applyMove(user, target, move, roll) {
+
+    // 🎯 LOG MOVE NAME
+    log(`${user.name} uses ${move.name}!`);
 
     let damage = 0;
 
@@ -334,29 +390,48 @@ function applyMove(user, target, move, roll) {
         damage += 2;
     }
 
-    if (damage > 0) {
+    // 💥 APPLY DAMAGE
+    if (damage > 0 && target) {
         target.currentHp -= damage;
         log(`${user.name} deals ${damage} damage to ${target.name}`);
-        handleDeath();
     }
 
-    // ✨ ON HIT EFFECTS
+    // ⚡ ELEMENTAL REACTION (VERY IMPORTANT)
+    if (move.element && target) {
+        tryElementalReaction(target, move.element, log);
+    }
+
+    // ✨ ON HIT
     if (move.onHit && target) {
         move.onHit(user, target, roll);
     }
 
-    // ⚡ ON USE (for support moves)
+    // ✨ ON USE
     if (move.onUse) {
         move.onUse(user, target);
+
+        // 🔥 CUSTOM LOGS (NOW YOU CAN IDENTIFY MOVES)
+        if (move.name === "Unbridled Rage") {
+            log(`${user.name} is going on a rampage!`);
+        }
+
+        if (move.name === "Beckoning Roar") {
+            log("Enemies are forced to target Grog!");
+        }
+
+        if (move.name === "Bardic Inspiration") {
+            log("Party gains +3 attack bonus for 2 turns!");
+        }
     }
 
+    // 🧊 COOLDOWN APPLY (ALWAYS)
     if (move.cooldown) {
         move.currentCooldown = move.cooldown;
     }
 
+    handleDeath();
     renderUnits();
 
-    // 🔚 TURN CONTROL
     if (move.endsTurn !== false) {
         nextTurn();
     }
@@ -365,19 +440,32 @@ function applyMove(user, target, move, roll) {
 function getAttackBonus(unit) {
     let bonus = unit.attackBonus || 0;
 
-    const inspiration = unit.statuses.find(s => s.type === "inspiration");
+    const inspiration = unit.statuses.find(s => s.type === STATUS.INSPIRATION);
 
     if (inspiration) {
-        bonus += inspiration.value;
+        bonus += inspiration.value || 3;
     }
 
     return bonus;
+}
+
+function getEffectiveAC(unit) {
+    let ac = unit.ac;
+
+    unit.statuses.forEach(s => {
+        if (s.type === STATUS.RECKLESS) {
+            ac += s.value; // value is -7
+        }
+    });
+
+    return ac;
 }
 
 function clearTargetSelection() {
     document.querySelectorAll(".unit").forEach(el => {
         el.style.outline = "";
         el.onclick = null;
+        el.style.pointerEvents = "auto";
     });
 }
 
@@ -391,33 +479,40 @@ function reduceCooldowns(unit) {
 
 function runEnemyTurn(enemy) {
 
+    clearActionUI(); // prevent UI interaction during enemy turn
+    document.querySelectorAll(".unit").forEach(el => {
+        el.style.pointerEvents = "none";
+    });
+
     log(`${enemy.name}'s turn`);
 
-    // ⏳ Small delay for feel
     setTimeout(() => {
 
         if (enemy.type === "basic") {
             basicEnemyAI(enemy);
-        }
-
-        if (enemy.type === "elite") {
+        } else if (enemy.type === "elite") {
             eliteEnemyAI(enemy);
         }
 
-    }, 600);
+    }, 800); // ⏳ increased delay
 }
 
 function getTarget(enemy) {
-    const players = combatState.units.filter(u => u.team === "player" && u.currentHp > 0);
 
-    // 🎯 Check for TAUNT
+    const players = combatState.units.filter(u =>
+        u.team === "player" &&
+        u.currentHp > 0
+    );
+
+    if (players.length === 0) return null;
+
+    // 🎯 TAUNT
     const tauntTarget = players.find(p =>
         p.statuses.some(s => s.type === STATUS.TAUNT)
     );
 
     if (tauntTarget) return tauntTarget;
 
-    // 🎲 Random target
     return players[Math.floor(Math.random() * players.length)];
 }
 
@@ -425,9 +520,14 @@ function basicEnemyAI(enemy) {
 
     const target = getTarget(enemy);
 
+    if (!target) {
+        log("No targets left");
+        return endEnemyTurn();
+    }
+
     const roll = rollAttack({
         attackBonus: 0,
-        targetAC: target.ac
+        targetAC: getEffectiveAC(target)
     });
 
     log(`${enemy.name} attacks ${target.name}`);
@@ -435,27 +535,22 @@ function basicEnemyAI(enemy) {
 
     if (!roll.hit) {
         log("Miss!");
-        return endEnemyTurn();
+        return endEnemyTurn(); // ✅ REQUIRED
     }
 
-    let damage = 1;
+    let damage;
 
-    // 🎲 Damage distribution
-    const rand = Math.random();
-
-    if (roll.isCrit) {
-        damage = 3;
-    } else if (rand < 0.33) { // 1/3 chance for 2 damage
+    if (roll.isCrit) { // 2 damage on nat20s
         damage = 2;
-    } else { // 2/3 chance for 1 damage
-        damage = 1;
+    } else {
+        damage = 1; // always deal 1 damage
     }
 
     target.currentHp -= damage;
-    handleDeath();
 
     log(`${enemy.name} deals ${damage} damage to ${target.name}`);
 
+    handleDeath();
     renderUnits();
 
     endEnemyTurn();
@@ -465,30 +560,34 @@ function eliteEnemyAI(enemy) {
 
     const target = getTarget(enemy);
 
-    // 50% chance to use special
+    if (!target) {
+        log("No targets left");
+        return endEnemyTurn();
+    }
+
     const useSpecial = Math.random() < 0.5 && enemy.specialMove;
 
     if (useSpecial) {
+
         log(`${enemy.name} uses ${enemy.specialMove.name}!`);
 
         const roll = rollAttack({
             attackBonus: 0,
-            targetAC: target.ac
+            targetAC: getEffectiveAC(target)
         });
 
         log(`Roll: ${roll.total}`);
 
         if (!roll.hit) {
             log("Miss!");
-            return endEnemyTurn();
+            return endEnemyTurn(); // ✅ REQUIRED
         }
 
-        let damage = enemy.specialMove.getDamage
+        const damage = enemy.specialMove.getDamage
             ? enemy.specialMove.getDamage(roll)
             : 2;
 
         target.currentHp -= damage;
-        handleDeath();
 
         log(`${enemy.name} deals ${damage} damage to ${target.name}`);
 
@@ -496,35 +595,50 @@ function eliteEnemyAI(enemy) {
             enemy.specialMove.onHit(target);
         }
 
+        handleDeath();
+        renderUnits();
+
+        endEnemyTurn(); // ✅ REQUIRED
+
     } else {
-        basicEnemyAI(enemy);
-        return; // already ends turn
+        return basicEnemyAI(enemy); // already ends turn
     }
-
-    renderUnits();
-
-    endEnemyTurn();
 }
 
 function endEnemyTurn() {
     setTimeout(() => {
         nextTurn();
-    }, 800);
+    }, 1000); // ⏳ slower transition
 }
 
 function nextTurn() {
+
+    if (!combatState.isActive) return;
+
     combatState.turnIndex++;
 
     if (combatState.turnIndex >= combatState.turnOrder.length) {
         combatState.turnIndex = 0;
     }
 
-    startTurn();
+    setTimeout(() => {
+        startTurn();
+    }, 300);
+}
+
+function clearActionUI() {
+    const actionsRow = document.getElementById("actionsRow");
+    const tooltip = document.getElementById("tooltip");
+    const charName = document.getElementById("charName");
+
+    if (actionsRow) actionsRow.innerHTML = "";
+    if (tooltip) tooltip.innerText = "";
+    if (charName) charName.innerText = "";
 }
 
 function handleDeath() {
 
-    // Remove dead enemies
+    // 💀 ENEMY DEATH
     combatState.units = combatState.units.filter(unit => {
         if (unit.team === "enemy" && unit.currentHp <= 0) {
             log(`${unit.name} is defeated!`);
@@ -533,22 +647,34 @@ function handleDeath() {
         return true;
     });
 
-    // Rebuild turn order (VERY IMPORTANT)
+    // 💀 ALLY DEATH (DO NOT REMOVE)
+    combatState.units.forEach(unit => {
+        if (unit.team === "player" && unit.currentHp <= 0 && !unit._deadLogged) {
+            log(`${unit.name} has fallen!`);
+            unit._deadLogged = true;
+        }
+    });
+
+    // 🔄 REBUILD TURN ORDER (KEEP DEAD ALLIES)
     combatState.turnOrder = combatState.units
-        .filter(u => u.currentHp > 0 || u.team === "player")
         .sort((a, b) => b.initiative - a.initiative);
 
-    // Fix turn index if needed
-    if (combatState.turnIndex >= combatState.turnOrder.length) {
-        combatState.turnIndex = 0;
-    }
-
-    // 🏆 Check win condition
+    // 🏆 WIN CHECK
     const enemiesAlive = combatState.units.some(u => u.team === "enemy");
 
     if (!enemiesAlive) {
-        log("Victory!");
-        // !! TODO: return to story !!
+        setTimeout(() => showCombatResult("win"), 800);
+        return;
+    }
+
+    // 💀 LOSE CHECK
+    const alliesAlive = combatState.units.some(
+        u => u.team === "player" && u.currentHp > 0
+    );
+
+    if (!alliesAlive) {
+        setTimeout(() => showCombatResult("lose"), 800);
+        return;
     }
 }
 
@@ -562,4 +688,65 @@ function log(text) {
 
     logBox.appendChild(entry);
     logBox.scrollTop = logBox.scrollHeight;
+}
+
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function showCombatResult(type) {
+    const modal = document.createElement("div");
+    modal.className = "combat-modal";
+
+    const isWin = type === "win";
+
+    modal.innerHTML = `
+        <div class="combat-modal-overlay">
+            <div class="combat-modal-box">
+                <h2>${isWin ? "Victory!" : "Defeat..."}</h2>
+                <button id="combatResultBtn">
+                    ${isWin ? "Continue" : "Try Again"}
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById("combatResultBtn").onclick = () => {
+        modal.remove();
+
+        if (isWin) {
+            endCombatWin();
+        } else {
+            restartCombat();
+        }
+    };
+}
+
+function endCombatWin() {
+    const { onWin } = gameState.currentCombat;
+
+    // Resume story
+    gameState.screen = "story";
+
+    // Move to the correct step AFTER combat
+    if (onWin !== undefined) {
+        gameState.step = onWin;
+    }
+
+    saveGame(gameState);
+
+    render();
+}
+
+function restartCombat() {
+    // simply reload the current save
+    const save = loadGame(gameState.saveId);
+
+    if (save) {
+        Object.assign(gameState, save);
+    }
+
+    render();
 }

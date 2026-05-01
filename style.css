@@ -367,13 +367,28 @@ body {
 }
 
 /* Turn Bar */
-.turn-bar {
-    height: 60px;
-    border-bottom: 2px solid #444;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 10px;
+.turn-unit {
+    width: 50px;
+    height: 50px;
+    margin: 4px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.turn-unit img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.turn-unit.active-turn {
+    border: 2px solid yellow;
+}
+
+.turn-unit.dead-unit {
+    filter: grayscale(100%);
+    opacity: 0.5;
 }
 
 /* Battlefield */
@@ -406,6 +421,67 @@ body {
     background: #444;
     border: 2px solid #888;
     border-radius: 10px;
+    position: relative;
+}
+
+.status-bar {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    gap: 4px;
+    font-size: 18px;
+}
+
+.turn-bar {
+    height: 60px;
+    border-bottom: 2px solid #444;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+}
+
+.turn-unit {
+    width: 50px;
+    height: 50px;
+    margin: 4px;
+    align-self: center;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.turn-unit img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.turn-unit.active-turn {
+    border: 2px solid yellow;
+}
+
+.turn-unit.dead-unit {
+    filter: grayscale(100%);
+    opacity: 0.5;
+}
+
+.hp-bar {
+    width: 100%;
+    height: 6px;
+    background: #333;
+    margin-top: 4px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.hp-fill {
+    height: 100%;
+    background: limegreen;
+    transition: width 0.3s ease;
 }
 
 /* Bottom UI */
@@ -495,3 +571,36 @@ button:hover {
     font-size: 12px;
     background: #111;
 }
+
+.combat-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.combat-modal-overlay {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.combat-modal-box {
+    background: #222;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+}
+
+.combat-modal-box button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+

@@ -5,6 +5,7 @@ import { showNewGame } from "../screens/newgamePage.js";
 import { showSaves } from "../screens/continuePage.js";
 import { showChoices } from "../screens/choicesPage.js";
 import { showCombat } from "../combat/combatPage.js";
+import { startStory } from "../engine/renderer.js";
 
 // Make navigation globally accessible (for onclick)
 window.navigate = function(screen) {
@@ -28,6 +29,9 @@ export function render() {
             break;
         case "combat":
             showCombat();
+            break;
+        case "story":
+            startStory();
             break;
     }
 }
