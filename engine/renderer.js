@@ -475,19 +475,15 @@ function showAdvantageRetry(step) {
 }
 
 function startCombat(step) {
-    // Save combat context
     gameState.currentCombat = {
         encounterId: step.encounterId,
         onWin: step.onWin,
         onLose: step.onLose
     };
 
-    // Switch screen
-    gameState.screen = "combat";
-
     saveGame(gameState);
 
-    render(); // render combat screen
+    navigate("combat"); // uses global navigation
 }
 
 // Simple utility to wait for a specified time (used for pacing)
