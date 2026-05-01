@@ -152,7 +152,7 @@ export const moves = {
         requiresRoll: true,
         threshold: 10,
 
-        description: "Rellynn shoots a fireball and burns the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nBurning enemies take 1 damage on each of the next 2 turns.\nCauses the MELT effect if the burning enemy is met with ice, and deals 3 damage.\nCauses the OVERLOAD effect if the burning enemy is met with lightning, and deals 3 damage.",
+        description: "Rellynn shoots a fireball and burns the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nBurning enemies take 1 damage on each of the next 2 turns.\nCauses the MELT effect if the burning enemy is met with ice, and deals 3 damage. Causes the OVERLOAD effect if the burning enemy is met with lightning, and deals 3 damage.",
 
         element: STATUS.BURN,
 
@@ -166,7 +166,7 @@ export const moves = {
         requiresRoll: true,
         threshold: 10,
 
-        description: "Rellynn shoots a ice beam and freezes the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nFrozen enemies take 1 damage on each of the next 2 turns.\nCauses the MELT effect if the frozen enemy is met with fire, and deals 3 damage.\nCauses the SUPERCONDUCT effect if the frozen enemy is met with lightning, and deals 3 damage.",
+        description: "Rellynn shoots a ice beam and freezes the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nFrozen enemies take 1 damage on each of the next 2 turns.\nCauses the MELT effect if the frozen enemy is met with fire, and deals 3 damage. Causes the SUPERCONDUCT effect if the frozen enemy is met with lightning, and deals 3 damage.",
 
         element: STATUS.FROST,
 
@@ -180,7 +180,7 @@ export const moves = {
         requiresRoll: true,
         threshold: 10,
 
-        description: "Rellynn shoots a lighting bolt and shocks the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nShocked enemies take 1 damage on each of the next 2 turns.\nCauses the OVERLOAD effect if the shocked enemy is met with fire, and deals 3 damage.\nCauses the SUPERCONDUCT effect if the shocked enemy is met with ice, and deals 3 damage.",
+        description: "Rellynn shoots a lighting bolt and shocks the enemy. Requires 10 or above to hit. Deals 1 damage. Deals 2 damage on nat20s.\nShocked enemies take 1 damage on each of the next 2 turns.\nCauses the OVERLOAD effect if the shocked enemy is met with fire, and deals 3 damage. Causes the SUPERCONDUCT effect if the shocked enemy is met with ice, and deals 3 damage.",
 
         element: STATUS.SHOCK,
 

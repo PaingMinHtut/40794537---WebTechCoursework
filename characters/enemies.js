@@ -6,7 +6,7 @@ export const enemies = {
         id: "cola",
         name: "Can o' Coca Cola",
         portrait: "cola.png",
-        hp: 1,
+        hp: 3,
         initiative: 3,
         type: "basic"
     },
@@ -15,7 +15,7 @@ export const enemies = {
         id: "doritos",
         name: "Doritos Bag",
         portrait: "doritos.png",
-        hp: 1,
+        hp: 2,
         initiative: 9,
         type: "basic"
     },
@@ -24,7 +24,7 @@ export const enemies = {
         id: "oreo",
         name: "Oreo Cookie",
         portrait: "oreo.png",
-        hp: 1,
+        hp: 3,
         initiative: 5,
         type: "basic"
     },
@@ -33,7 +33,7 @@ export const enemies = {
         id: "pizza_roll",
         name: "Pizza Roll",
         portrait: "pizzaroll.png",
-        hp: 1,
+        hp: 5,
         initiative: 5,
         type: "elite",
 
@@ -57,7 +57,7 @@ export const enemies = {
         id: "toy_dragon",
         name: "Dragon",
         portrait: "dragon.png",
-        hp: 1,
+        hp: 10,
         initiative: 9,
         type: "elite",
 
