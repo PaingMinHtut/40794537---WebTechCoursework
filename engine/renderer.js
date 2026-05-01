@@ -1,7 +1,6 @@
 import { gameState } from "./state.js";
-import { render } from "../app.js";
 import { saveGame } from "./saveSystem.js";
-import { openDiceModal } from "../engine/dice.js";
+import { openDiceModal } from "./dice.js";
 import { chapter1 } from "../story/chapter1.js";
 import { chapter2 } from "../story/chapter2.js";
 import { chapter3 } from "../story/chapter3.js";
